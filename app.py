@@ -452,7 +452,7 @@ def ricavi_chart(df):
 
     # --------------------------------------------------
     # Barre Retail
-    # Percentuale in basso nel primo segmento della barra
+    # Percentuale in basso nel primo segmento
     # --------------------------------------------------
 
     fig.add_trace(
@@ -469,11 +469,11 @@ def ricavi_chart(df):
             ),
             text=retail_text,
             textposition="inside",
-            insidetextanchor="start",   # mette la % in basso
+            insidetextanchor="start",
             textfont=dict(
                 size=18,
                 color="white",
-                family="Arial"          # non grassetto
+                family="Arial"
             ),
             hovertemplate=(
                 "<b>%{x}</b><br>"
@@ -506,7 +506,7 @@ def ricavi_chart(df):
             textfont=dict(
                 size=18,
                 color="white",
-                family="Arial"          # non grassetto
+                family="Arial"
             ),
             hovertemplate=(
                 "<b>%{x}</b><br>"
@@ -549,7 +549,6 @@ def ricavi_chart(df):
 
     # --------------------------------------------------
     # Totale sopra ogni istogramma
-    # Ancora più alto per dare più aria alle barre
     # --------------------------------------------------
 
     for _, row in df.iterrows():
@@ -567,7 +566,7 @@ def ricavi_chart(df):
         )
 
     # --------------------------------------------------
-    # Etichette rosse del trend
+    # Etichette rosse del delta
     # --------------------------------------------------
 
     for _, row in df.iterrows():
@@ -597,8 +596,8 @@ def ricavi_chart(df):
 
     fig.update_layout(
         barmode="stack",
-        height=610,
-        margin=dict(l=10, r=25, t=105, b=105),
+        height=620,
+        margin=dict(l=10, r=25, t=115, b=110),
 
         title=dict(
             text="Ricavi ricorrenti: composizione e scostamento totale",
@@ -646,37 +645,40 @@ def ricavi_chart(df):
 
     # --------------------------------------------------
     # Asse Y ricavi nascosto
-    # Aumentato spazio superiore per i totaloni
+    # Più spazio sopra per i totaloni
     # --------------------------------------------------
 
     fig.update_yaxes(
         visible=False,
         showgrid=False,
         zeroline=False,
-        range=[0, max(df["Totale k€"]) + 5600],
+        range=[0, max(df["Totale k€"]) + 7000],
         secondary_y=False
     )
 
     # --------------------------------------------------
     # Asse Y delta nascosto
+    # Range più lungo per evitare sovrapposizioni coi totaloni
     # --------------------------------------------------
 
     delta_min = df["Delta Totale k€"].min()
     delta_max = df["Delta Totale k€"].max()
-    delta_padding = max(abs(delta_min), abs(delta_max), 100) * 0.65
+    delta_abs = max(abs(delta_min), abs(delta_max), 100)
 
     fig.update_yaxes(
         visible=False,
         showgrid=False,
         zeroline=False,
         range=[
-            delta_min - delta_padding,
-            delta_max + delta_padding
+            delta_min - delta_abs * 1.8,
+            delta_max + delta_abs * 5.5
         ],
         secondary_y=True
     )
 
     return fig
+
+
 def arpu_chart(df):
     fig = go.Figure()
 
