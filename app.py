@@ -549,13 +549,13 @@ def ricavi_chart(df):
 
     # --------------------------------------------------
     # Totale sopra ogni istogramma
-    # Via di mezzo: più alto di prima, ma non troppo
+    # Ancora più alto sopra le barre
     # --------------------------------------------------
 
     for _, row in df.iterrows():
         fig.add_annotation(
             x=row["Mese"],
-            y=row["Totale k€"] + 1150,
+            y=row["Totale k€"] + 1800,
             text=f"<b>{row['Totale k€']:,.0f}</b>".replace(",", "."),
             showarrow=False,
             font=dict(
@@ -597,8 +597,8 @@ def ricavi_chart(df):
 
     fig.update_layout(
         barmode="stack",
-        height=600,
-        margin=dict(l=10, r=25, t=100, b=105),
+        height=610,
+        margin=dict(l=10, r=25, t=110, b=105),
 
         title=dict(
             text="Ricavi ricorrenti: composizione e scostamento totale",
@@ -646,14 +646,14 @@ def ricavi_chart(df):
 
     # --------------------------------------------------
     # Asse Y ricavi nascosto
-    # Spazio medio sopra i totaloni
+    # Più spazio superiore per i totaloni
     # --------------------------------------------------
 
     fig.update_yaxes(
         visible=False,
         showgrid=False,
         zeroline=False,
-        range=[0, max(df["Totale k€"]) + 5600],
+        range=[0, max(df["Totale k€"]) + 6800],
         secondary_y=False
     )
 
