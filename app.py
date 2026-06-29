@@ -440,7 +440,6 @@ def ricavi_chart(df):
     df["Perc Retail"] = df["Retail"] / df["Totale"] * 100
     df["Perc Wholesale"] = df["Wholesale"] / df["Totale"] * 100
 
-    # Testi dentro le barre
     retail_text = [f"{v:.0f}%" for v in df["Perc Retail"]]
     wholesale_text = [f"{v:.0f}%" for v in df["Perc Wholesale"]]
 
@@ -455,8 +454,9 @@ def ricavi_chart(df):
             textposition="inside",
             insidetextanchor="middle",
             textfont=dict(
-                size=12,
-                color="white"
+                size=16,
+                color="white",
+                family="Arial Black"
             ),
             hovertemplate=(
                 "<b>%{x}</b><br>"
@@ -478,8 +478,9 @@ def ricavi_chart(df):
             textposition="inside",
             insidetextanchor="middle",
             textfont=dict(
-                size=12,
-                color="white"
+                size=16,
+                color="#111827",
+                family="Arial Black"
             ),
             hovertemplate=(
                 "<b>%{x}</b><br>"
@@ -490,26 +491,24 @@ def ricavi_chart(df):
         secondary_y=False
     )
 
-    # Linea delta totale in k€
+    # Linea delta totale, senza testo diretto
     fig.add_trace(
         go.Scatter(
             x=df["Mese"],
             y=df["Delta Totale k€"],
             name="Scostamento totale vs inizio",
-            mode="lines+markers+text",
+            mode="lines+markers",
             line=dict(
                 color=colore_delta,
                 width=3
             ),
             marker=dict(
-                size=8,
-                color=colore_delta
-            ),
-            text=[f"{v:+.0f}k" for v in df["Delta Totale k€"]],
-            textposition="top center",
-            textfont=dict(
-                size=11,
-                color=colore_delta
+                size=9,
+                color=colore_delta,
+                line=dict(
+                    width=2,
+                    color="white"
+                )
             ),
             hovertemplate=(
                 "<b>%{x}</b><br>"
@@ -520,20 +519,43 @@ def ricavi_chart(df):
     )
 
     # Totale sopra ogni istogramma
-    for i, row in df.iterrows():
+    for _, row in df.iterrows():
         fig.add_annotation(
             x=row["Mese"],
-            y=row["Totale"] + 0.35,
+            y=row["Totale"] + 0.42,
             text=f"<b>{row['Totale']:.2f} Mln</b>",
             showarrow=False,
             font=dict(
-                size=13,
-                color=colore_testo
+                size=17,
+                color=colore_testo,
+                family="Arial Black"
             ),
             yref="y1"
         )
 
-    # Annotazione finale del delta
+    # Etichette rosse del trend con sfondo bianco
+    for _, row in df.iterrows():
+        delta_value = row["Delta Totale k€"]
+
+        fig.add_annotation(
+            x=row["Mese"],
+            y=delta_value,
+            yref="y2",
+            text=f"<b>{delta_value:+.0f}k</b>",
+            showarrow=False,
+            font=dict(
+                size=13,
+                color=colore_delta,
+                family="Arial Black"
+            ),
+            bgcolor="rgba(255,255,255,0.92)",
+            bordercolor=colore_delta,
+            borderwidth=1,
+            borderpad=4,
+            yshift=18 if delta_value >= 0 else -18
+        )
+
+    # Annotazione finale più descrittiva
     primo_totale = df["Totale"].iloc[0]
     ultimo_totale = df["Totale"].iloc[-1]
     delta_finale_k = df["Delta Totale k€"].iloc[-1]
@@ -546,29 +568,38 @@ def ricavi_chart(df):
         text=f"<b>{delta_finale_k:+.0f}k €</b><br>{delta_finale_pct:+.1f}% vs inizio",
         showarrow=True,
         arrowhead=2,
-        ax=-75,
-        ay=-45,
+        ax=-90,
+        ay=-60,
         font=dict(
-            size=12,
-            color=colore_delta
+            size=14,
+            color=colore_delta,
+            family="Arial"
         ),
         bgcolor="white",
-        bordercolor="#D1D5DB",
+        bordercolor=colore_delta,
         borderwidth=1,
-        borderpad=5
+        borderpad=6
     )
 
     fig.update_layout(
         barmode="stack",
-        height=540,
-        margin=dict(l=10, r=20, t=60, b=80),
+        height=560,
+        margin=dict(l=10, r=25, t=65, b=85),
+
+        title=dict(
+            text="Ricavi ricorrenti: composizione e variazione totale",
+            x=0,
+            xanchor="left",
+            font=dict(size=19)
+        ),
 
         legend=dict(
             orientation="h",
             yanchor="bottom",
             y=1.03,
             xanchor="left",
-            x=0
+            x=0,
+            font=dict(size=13)
         ),
 
         hovermode="x unified",
@@ -578,14 +609,14 @@ def ricavi_chart(df):
 
         uniformtext=dict(
             mode="show",
-            minsize=10
+            minsize=13
         )
     )
 
     # Asse X
     fig.update_xaxes(
         tickangle=-35,
-        tickfont=dict(size=11),
+        tickfont=dict(size=12),
         showline=False,
         showgrid=False,
         zeroline=False
@@ -596,14 +627,14 @@ def ricavi_chart(df):
         visible=False,
         showgrid=False,
         zeroline=False,
-        range=[0, max(df["Totale"]) + 2.2],
+        range=[0, max(df["Totale"]) + 2.4],
         secondary_y=False
     )
 
     # Asse Y delta nascosto
     delta_min = df["Delta Totale k€"].min()
     delta_max = df["Delta Totale k€"].max()
-    delta_padding = max(abs(delta_min), abs(delta_max), 100) * 0.35
+    delta_padding = max(abs(delta_min), abs(delta_max), 100) * 0.45
 
     fig.update_yaxes(
         visible=False,
@@ -617,7 +648,6 @@ def ricavi_chart(df):
     )
 
     return fig
-
 def arpu_chart(df):
     fig = go.Figure()
 
