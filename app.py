@@ -425,41 +425,97 @@ def arpu_table():
 def ricavi_chart(df):
     fig = go.Figure()
 
+    # Colori più leggibili
+    colore_retail = "#2F80ED"      # blu
+    colore_wholesale = "#F2994A"   # arancione
+    colore_totale = "#111827"      # quasi nero
+
+    # Barre Retail
     fig.add_trace(
         go.Bar(
             x=df["Mese"],
             y=df["Retail"],
-            name="RETAIL",
-            marker_color="#0067A6",
-            text=[f"{v:.1f}" for v in df["Retail"]],
-            textposition="inside"
+            name="Retail",
+            marker_color=colore_retail,
+            hovertemplate="<b>%{x}</b><br>Retail: %{y:.2f} Mln €<extra></extra>"
         )
     )
 
+    # Barre Wholesale
     fig.add_trace(
         go.Bar(
             x=df["Mese"],
             y=df["Wholesale"],
-            name="WHOLESALE",
-            marker_color="#F2C94C",
-            text=[f"{v:.1f}" for v in df["Wholesale"]],
-            textposition="inside"
+            name="Wholesale",
+            marker_color=colore_wholesale,
+            hovertemplate="<b>%{x}</b><br>Wholesale: %{y:.2f} Mln €<extra></extra>"
         )
     )
 
-    for i, total_value in enumerate(df["Totale"]):
-        fig.add_annotation(
-            x=df["Mese"].iloc[i],
-            y=total_value + 0.25,
-            text=f"{total_value:.3f}",
-            showarrow=False,
-            font=dict(size=11, color="#666666")
+    # Linea Totale
+    fig.add_trace(
+        go.Scatter(
+            x=df["Mese"],
+            y=df["Totale"],
+            name="Totale ricavi",
+            mode="lines+markers+text",
+            line=dict(
+                color=colore_totale,
+                width=3
+            ),
+            marker=dict(
+                size=8,
+                color=colore_totale
+            ),
+            text=[f"{v:.1f}" for v in df["Totale"]],
+            textposition="top center",
+            textfont=dict(
+                size=11,
+                color=colore_totale
+            ),
+            hovertemplate="<b>%{x}</b><br>Totale: %{y:.2f} Mln €<extra></extra>"
         )
+    )
+
+    # Calcolo variazione inizio/fine periodo
+    primo_valore = df["Totale"].iloc[0]
+    ultimo_valore = df["Totale"].iloc[-1]
+    delta = ultimo_valore - primo_valore
+    delta_perc = delta / primo_valore * 100
+
+    if delta >= 0:
+        testo_delta = f"+{delta:.2f} Mln € / +{delta_perc:.1f}%"
+    else:
+        testo_delta = f"{delta:.2f} Mln € / {delta_perc:.1f}%"
+
+    # Annotazione finale sul trend
+    fig.add_annotation(
+        x=df["Mese"].iloc[-1],
+        y=ultimo_valore,
+        text=f"<b>Ultimo: {ultimo_valore:.2f} Mln €</b><br>{testo_delta} vs inizio periodo",
+        showarrow=True,
+        arrowhead=2,
+        ax=-70,
+        ay=-45,
+        font=dict(size=12, color=colore_totale),
+        bgcolor="white",
+        bordercolor="#D1D5DB",
+        borderwidth=1,
+        borderpad=5
+    )
 
     fig.update_layout(
         barmode="stack",
-        height=470,
-        margin=dict(l=10, r=10, t=20, b=30),
+        height=500,
+        margin=dict(l=20, r=30, t=45, b=70),
+
+        title=dict(
+            text="Ricavi ricorrenti per BU e trend totale",
+            x=0,
+            xanchor="left",
+            font=dict(size=18)
+        ),
+
         legend=dict(
             orientation="h",
             yanchor="bottom",
@@ -467,13 +523,22 @@ def ricavi_chart(df):
             xanchor="left",
             x=0
         ),
+
+        hovermode="x unified",
+
         yaxis=dict(
-            visible=False,
-            range=[0, max(df["Totale"]) + 2]
+            title="Mln €",
+            showgrid=True,
+            gridcolor="#E5E7EB",
+            zeroline=False,
+            range=[0, max(df["Totale"]) + 3]
         ),
+
         xaxis=dict(
+            tickangle=-35,
             tickfont=dict(size=11)
         ),
+
         paper_bgcolor="white",
         plot_bgcolor="white"
     )
