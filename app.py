@@ -675,9 +675,9 @@ def ricavi_chart(df):
         delta_max + delta_abs * 6.0
     ],
     secondary_y=True
-)
-
-return fig
+    )
+    
+    return fig
 
 
 
