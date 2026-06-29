@@ -845,17 +845,6 @@ def arpu_chart(df):
         height=600,
         margin=dict(l=10, r=25, t=100, b=105),
 
-        title=dict(
-            text="ARPU CB Netta: confronto BU e trend totale",
-            x=0,
-            xanchor="left",
-            font=dict(
-                size=20,
-                color=colore_testo,
-                family="Arial"
-            )
-        ),
-
         legend=dict(
             orientation="h",
             yanchor="bottom",
@@ -1066,7 +1055,7 @@ else:
 
         with top1:
             st.markdown(
-                '<div class="panel-title">ARPU CB Netta per Mese</div>',
+                '<div class="panel-title">ARPU CB Netta per Mese (€)</div>',
                 unsafe_allow_html=True
             )
 
