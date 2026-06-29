@@ -428,7 +428,7 @@ def ricavi_chart(df):
 
     df = df.copy()
 
-    # Palette più moderna
+    # Palette moderna
     colore_retail = "#2563EB"        # blu elettrico
     colore_wholesale = "#00BFA6"     # teal/acqua
     colore_delta = "#E11D48"         # rosso/magenta trend
@@ -452,6 +452,7 @@ def ricavi_chart(df):
 
     # --------------------------------------------------
     # Barre Retail
+    # Percentuale in basso nel primo segmento della barra
     # --------------------------------------------------
 
     fig.add_trace(
@@ -468,11 +469,11 @@ def ricavi_chart(df):
             ),
             text=retail_text,
             textposition="inside",
-            insidetextanchor="middle",
+            insidetextanchor="start",   # mette la % in basso
             textfont=dict(
-                size=17,
+                size=18,
                 color="white",
-                family="Arial Black"
+                family="Arial"          # non grassetto
             ),
             hovertemplate=(
                 "<b>%{x}</b><br>"
@@ -503,9 +504,9 @@ def ricavi_chart(df):
             textposition="inside",
             insidetextanchor="middle",
             textfont=dict(
-                size=17,
+                size=18,
                 color="white",
-                family="Arial Black"
+                family="Arial"          # non grassetto
             ),
             hovertemplate=(
                 "<b>%{x}</b><br>"
@@ -548,17 +549,17 @@ def ricavi_chart(df):
 
     # --------------------------------------------------
     # Totale sopra ogni istogramma
-    # Più alto rispetto a prima per dare aria alle barre
+    # Ancora più alto per dare più aria alle barre
     # --------------------------------------------------
 
     for _, row in df.iterrows():
         fig.add_annotation(
             x=row["Mese"],
-            y=row["Totale k€"] + 950,
+            y=row["Totale k€"] + 1450,
             text=f"<b>{row['Totale k€']:,.0f}</b>".replace(",", "."),
             showarrow=False,
             font=dict(
-                size=21,
+                size=22,
                 color=colore_testo,
                 family="Arial Black"
             ),
@@ -596,8 +597,8 @@ def ricavi_chart(df):
 
     fig.update_layout(
         barmode="stack",
-        height=590,
-        margin=dict(l=10, r=25, t=85, b=85),
+        height=610,
+        margin=dict(l=10, r=25, t=105, b=105),
 
         title=dict(
             text="Ricavi ricorrenti: composizione e scostamento totale",
@@ -622,30 +623,44 @@ def ricavi_chart(df):
 
         uniformtext=dict(
             mode="show",
-            minsize=13
+            minsize=14
         )
     )
 
-    # Asse X visibile
+    # --------------------------------------------------
+    # Asse X più leggibile
+    # --------------------------------------------------
+
     fig.update_xaxes(
-        tickangle=-35,
-        tickfont=dict(size=12),
+        tickangle=-25,
+        tickfont=dict(
+            size=15,
+            color="#111827",
+            family="Arial"
+        ),
         showline=False,
         showgrid=False,
-        zeroline=False
+        zeroline=False,
+        automargin=True
     )
 
+    # --------------------------------------------------
     # Asse Y ricavi nascosto
-    # Aumento il margine superiore per far respirare i totaloni
+    # Aumentato spazio superiore per i totaloni
+    # --------------------------------------------------
+
     fig.update_yaxes(
         visible=False,
         showgrid=False,
         zeroline=False,
-        range=[0, max(df["Totale k€"]) + 4300],
+        range=[0, max(df["Totale k€"]) + 5600],
         secondary_y=False
     )
 
+    # --------------------------------------------------
     # Asse Y delta nascosto
+    # --------------------------------------------------
+
     delta_min = df["Delta Totale k€"].min()
     delta_max = df["Delta Totale k€"].max()
     delta_padding = max(abs(delta_min), abs(delta_max), 100) * 0.65
@@ -662,7 +677,6 @@ def ricavi_chart(df):
     )
 
     return fig
-
 def arpu_chart(df):
     fig = go.Figure()
 
