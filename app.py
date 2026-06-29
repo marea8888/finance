@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 
 # --------------------------------------------------
@@ -423,12 +424,16 @@ def arpu_table():
 # --------------------------------------------------
 
 def ricavi_chart(df):
-    fig = go.Figure()
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
 
-    # Colori più leggibili
-    colore_retail = "#2F80ED"      # blu
-    colore_wholesale = "#F2994A"   # arancione
-    colore_totale = "#111827"      # quasi nero
+    colore_retail = "#1F77B4"        # blu più sobrio
+    colore_wholesale = "#FFB000"     # giallo/arancio leggibile
+    colore_delta = "#D62728"         # rosso per evidenziare variazioni
+
+    df = df.copy()
+
+    # Scostamento del totale rispetto al primo mese, espresso in k€
+    df["Delta Totale k€"] = (df["Totale"] - df["Totale"].iloc[0]) * 1000
 
     # Barre Retail
     fig.add_trace(
@@ -438,7 +443,8 @@ def ricavi_chart(df):
             name="Retail",
             marker_color=colore_retail,
             hovertemplate="<b>%{x}</b><br>Retail: %{y:.2f} Mln €<extra></extra>"
-        )
+        ),
+        secondary_y=False
     )
 
     # Barre Wholesale
@@ -449,55 +455,59 @@ def ricavi_chart(df):
             name="Wholesale",
             marker_color=colore_wholesale,
             hovertemplate="<b>%{x}</b><br>Wholesale: %{y:.2f} Mln €<extra></extra>"
-        )
+        ),
+        secondary_y=False
     )
 
-    # Linea Totale
+    # Linea dello scostamento totale
     fig.add_trace(
         go.Scatter(
             x=df["Mese"],
-            y=df["Totale"],
-            name="Totale ricavi",
+            y=df["Delta Totale k€"],
+            name="Scostamento totale vs inizio",
             mode="lines+markers+text",
             line=dict(
-                color=colore_totale,
+                color=colore_delta,
                 width=3
             ),
             marker=dict(
                 size=8,
-                color=colore_totale
+                color=colore_delta
             ),
-            text=[f"{v:.1f}" for v in df["Totale"]],
+            text=[f"{v:+.0f}k" for v in df["Delta Totale k€"]],
             textposition="top center",
             textfont=dict(
                 size=11,
-                color=colore_totale
+                color=colore_delta
             ),
-            hovertemplate="<b>%{x}</b><br>Totale: %{y:.2f} Mln €<extra></extra>"
-        )
+            hovertemplate="<b>%{x}</b><br>Scostamento totale: %{y:+.0f} k€<extra></extra>"
+        ),
+        secondary_y=True
     )
 
-    # Calcolo variazione inizio/fine periodo
-    primo_valore = df["Totale"].iloc[0]
-    ultimo_valore = df["Totale"].iloc[-1]
-    delta = ultimo_valore - primo_valore
-    delta_perc = delta / primo_valore * 100
+    # Linea zero per capire subito sopra/sotto baseline
+    fig.add_hline(
+        y=0,
+        line_dash="dot",
+        line_color="#9CA3AF",
+        secondary_y=True
+    )
 
-    if delta >= 0:
-        testo_delta = f"+{delta:.2f} Mln € / +{delta_perc:.1f}%"
-    else:
-        testo_delta = f"{delta:.2f} Mln € / {delta_perc:.1f}%"
+    primo_totale = df["Totale"].iloc[0]
+    ultimo_totale = df["Totale"].iloc[-1]
+    delta_finale_k = df["Delta Totale k€"].iloc[-1]
+    delta_finale_pct = (ultimo_totale - primo_totale) / primo_totale * 100
 
-    # Annotazione finale sul trend
     fig.add_annotation(
         x=df["Mese"].iloc[-1],
-        y=ultimo_valore,
-        text=f"<b>Ultimo: {ultimo_valore:.2f} Mln €</b><br>{testo_delta} vs inizio periodo",
+        y=delta_finale_k,
+        yref="y2",
+        text=f"<b>{delta_finale_k:+.0f}k €</b><br>{delta_finale_pct:+.1f}% vs inizio",
         showarrow=True,
         arrowhead=2,
         ax=-70,
         ay=-45,
-        font=dict(size=12, color=colore_totale),
+        font=dict(size=12, color=colore_delta),
         bgcolor="white",
         bordercolor="#D1D5DB",
         borderwidth=1,
@@ -506,38 +516,53 @@ def ricavi_chart(df):
 
     fig.update_layout(
         barmode="stack",
-        height=500,
-        margin=dict(l=20, r=30, t=45, b=70),
+        height=520,
+        margin=dict(l=20, r=40, t=55, b=80),
+
+        title=dict(
+            text="Ricavi ricorrenti: valore assoluto e scostamento totale",
+            x=0,
+            xanchor="left",
+            font=dict(size=18)
+        ),
 
         legend=dict(
             orientation="h",
             yanchor="bottom",
-            y=1.02,
+            y=1.03,
             xanchor="left",
             x=0
         ),
 
         hovermode="x unified",
 
-        yaxis=dict(
-            title="Mln €",
-            showgrid=True,
-            gridcolor="#E5E7EB",
-            zeroline=False,
-            range=[0, max(df["Totale"]) + 3]
-        ),
-
-        xaxis=dict(
-            tickangle=-35,
-            tickfont=dict(size=11)
-        ),
-
         paper_bgcolor="white",
         plot_bgcolor="white"
     )
 
-    return fig
+    fig.update_yaxes(
+        title_text="Ricavi Mln €",
+        showgrid=True,
+        gridcolor="#E5E7EB",
+        zeroline=False,
+        range=[0, max(df["Totale"]) + 2],
+        secondary_y=False
+    )
 
+    fig.update_yaxes(
+        title_text="Scostamento totale k€",
+        showgrid=False,
+        zeroline=True,
+        zerolinecolor="#9CA3AF",
+        secondary_y=True
+    )
+
+    fig.update_xaxes(
+        tickangle=-35,
+        tickfont=dict(size=11)
+    )
+
+    return fig
 
 def arpu_chart(df):
     fig = go.Figure()
