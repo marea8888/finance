@@ -509,12 +509,6 @@ def ricavi_chart(df):
         height=500,
         margin=dict(l=20, r=30, t=45, b=70),
 
-        title=dict(
-            x=0,
-            xanchor="left",
-            font=dict(size=18)
-        ),
-
         legend=dict(
             orientation="h",
             yanchor="bottom",
