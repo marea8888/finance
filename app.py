@@ -510,7 +510,6 @@ def ricavi_chart(df):
         margin=dict(l=20, r=30, t=45, b=70),
 
         title=dict(
-            text="Ricavi ricorrenti per BU e trend totale",
             x=0,
             xanchor="left",
             font=dict(size=18)
