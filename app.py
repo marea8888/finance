@@ -549,12 +549,13 @@ def ricavi_chart(df):
 
     # --------------------------------------------------
     # Totale sopra ogni istogramma
+    # Via di mezzo: più alto di prima, ma non troppo
     # --------------------------------------------------
 
     for _, row in df.iterrows():
         fig.add_annotation(
             x=row["Mese"],
-            y=row["Totale k€"] + 1450,
+            y=row["Totale k€"] + 1150,
             text=f"<b>{row['Totale k€']:,.0f}</b>".replace(",", "."),
             showarrow=False,
             font=dict(
@@ -596,8 +597,8 @@ def ricavi_chart(df):
 
     fig.update_layout(
         barmode="stack",
-        height=620,
-        margin=dict(l=10, r=25, t=115, b=110),
+        height=600,
+        margin=dict(l=10, r=25, t=100, b=105),
 
         title=dict(
             text="Ricavi ricorrenti: composizione e scostamento totale",
@@ -645,20 +646,20 @@ def ricavi_chart(df):
 
     # --------------------------------------------------
     # Asse Y ricavi nascosto
-    # Più spazio sopra per i totaloni
+    # Spazio medio sopra i totaloni
     # --------------------------------------------------
 
     fig.update_yaxes(
         visible=False,
         showgrid=False,
         zeroline=False,
-        range=[0, max(df["Totale k€"]) + 7000],
+        range=[0, max(df["Totale k€"]) + 5600],
         secondary_y=False
     )
 
     # --------------------------------------------------
     # Asse Y delta nascosto
-    # Range più lungo per evitare sovrapposizioni coi totaloni
+    # Via di mezzo: evita sovrapposizioni ma non schiaccia troppo la linea
     # --------------------------------------------------
 
     delta_min = df["Delta Totale k€"].min()
@@ -670,13 +671,15 @@ def ricavi_chart(df):
         showgrid=False,
         zeroline=False,
         range=[
-            delta_min - delta_abs * 1.8,
-            delta_max + delta_abs * 5.5
+            delta_min - delta_abs * 1.4,
+            delta_max + delta_abs * 3.8
         ],
         secondary_y=True
     )
 
     return fig
+
+
 
 
 def arpu_chart(df):
