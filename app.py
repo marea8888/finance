@@ -671,8 +671,8 @@ def ricavi_chart(df):
     showgrid=False,
     zeroline=False,
     range=[
-        delta_min - delta_abs * 1.0,
-        delta_max + delta_abs * 1.0
+        delta_min - delta_abs * 1.5,
+        delta_max + delta_abs * 1.5
     ],
     secondary_y=True
     )
