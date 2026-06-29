@@ -3,181 +3,225 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 
+
+# --------------------------------------------------
+# CONFIG PAGINA
+# --------------------------------------------------
+
 st.set_page_config(
     page_title="Finance | Ricavi Ricorrenti",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
+
 # --------------------------------------------------
 # CSS
 # --------------------------------------------------
 
-st.markdown("""
-<style>
-    .block-container {
-        padding-top: 1rem;
-        padding-bottom: 1rem;
-        max-width: 100%;
-    }
+st.markdown(
+    """
+    <style>
+        .block-container {
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+            max-width: 100%;
+        }
 
-    [data-testid="stSidebar"] {
-        background-color: #00A3D9;
-        padding-top: 0.5rem;
-    }
+        body {
+            background-color: #f3f3f3;
+        }
 
-    [data-testid="stSidebar"] * {
-        color: white;
-    }
+        [data-testid="stSidebar"] {
+            background-color: #00A3D9;
+            padding-top: 0.5rem;
+        }
 
-    [data-testid="stSidebar"] .stSelectbox label {
-        color: white;
-        font-weight: 700;
-        font-size: 0.75rem;
-    }
+        [data-testid="stSidebar"] * {
+            color: white;
+        }
 
-    [data-testid="stSidebar"] div[data-baseweb="select"] * {
-        color: #333333 !important;
-    }
+        [data-testid="stSidebar"] .stSelectbox label {
+            color: white;
+            font-weight: 700;
+            font-size: 0.75rem;
+        }
 
-    .logo-box {
-        text-align: center;
-        font-size: 3.2rem;
-        font-weight: 800;
-        color: white;
-        margin-bottom: 0.5rem;
-    }
+        [data-testid="stSidebar"] div[data-baseweb="select"] * {
+            color: #333333 !important;
+        }
 
-    .orange-button {
-        background-color: #f28c00;
-        border-radius: 5px;
-        padding: 0.55rem;
-        text-align: center;
-        color: white;
-        font-weight: 700;
-        margin: 0.35rem 0;
-    }
+        .logo-box {
+            text-align: center;
+            font-size: 3.2rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
 
-    .white-button {
-        background-color: white;
-        border-radius: 5px;
-        padding: 0.55rem;
-        text-align: center;
-        color: #00A3D9 !important;
-        font-weight: 700;
-        margin: 0.35rem 0 1rem 0;
-    }
+        .orange-button {
+            background-color: #f28c00;
+            border-radius: 5px;
+            padding: 0.55rem;
+            text-align: center;
+            color: white;
+            font-weight: 700;
+            margin: 0.35rem 0;
+        }
 
-    .title-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 0.5rem;
-    }
+        .white-button {
+            background-color: white;
+            border-radius: 5px;
+            padding: 0.55rem;
+            text-align: center;
+            color: #00A3D9 !important;
+            font-weight: 700;
+            margin: 0.35rem 0 1rem 0;
+        }
 
-    .dashboard-title {
-        font-size: 1.7rem;
-        font-weight: 700;
-        color: #2a2a2a;
-    }
+        .title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.7rem;
+        }
 
-    .last-update {
-        font-size: 0.8rem;
-        color: #111111;
-        font-weight: 600;
-    }
+        .dashboard-title {
+            font-size: 1.7rem;
+            font-weight: 700;
+            color: #2a2a2a;
+        }
 
-    .card {
-        background-color: white;
-        border-radius: 8px;
-        padding: 0.85rem 1rem;
-        box-shadow: 0 0 0 1px rgba(0,0,0,0.03);
-        height: 92px;
-    }
+        .last-update {
+            font-size: 0.8rem;
+            color: #111111;
+            font-weight: 600;
+        }
 
-    .card-title {
-        font-size: 0.85rem;
-        color: #6b6b6b;
-        margin-bottom: 0.25rem;
-    }
+        .section-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #2a2a2a;
+            margin-top: 0.5rem;
+            margin-bottom: 0.7rem;
+        }
 
-    .card-value {
-        font-size: 1.45rem;
-        color: #2a2a2a;
-        font-weight: 600;
-    }
+        .kpi-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 1rem 1.2rem;
+            min-height: 105px;
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.05);
+        }
 
-    .panel {
-        background-color: white;
-        border-radius: 8px;
-        padding: 0.65rem;
-        height: 100%;
-        box-shadow: 0 0 0 1px rgba(0,0,0,0.03);
-    }
+        .kpi-title {
+            font-size: 0.9rem;
+            color: #6b6b6b;
+            margin-bottom: 0.25rem;
+        }
 
-    .panel-title {
-        font-size: 1rem;
-        color: #3a3a3a;
-        font-weight: 500;
-        margin-bottom: 0.4rem;
-    }
+        .kpi-value {
+            font-size: 1.75rem;
+            color: #2a2a2a;
+            font-weight: 700;
+        }
 
-    .small-caption {
-        color: #666666;
-        font-size: 0.75rem;
-    }
+        .small-kpi-title {
+            font-size: 0.85rem;
+            color: #6b6b6b;
+            margin-bottom: 0.2rem;
+        }
 
-    body {
-        background-color: #f3f3f3;
-    }
+        .small-kpi-value {
+            font-size: 1.45rem;
+            color: #2a2a2a;
+            font-weight: 700;
+        }
 
-    div[data-testid="stHorizontalBlock"] {
-        gap: 1rem;
-    }
+        .panel-title {
+            font-size: 1.05rem;
+            color: #3a3a3a;
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+        }
 
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 0.78rem;
-    }
+        .small-caption {
+            color: #666666;
+            font-size: 0.78rem;
+            padding-top: 0.2rem;
+        }
 
-    th {
-        background-color: #0099D6;
-        color: white;
-        padding: 0.35rem;
-        text-align: right;
-    }
+        div.stButton > button {
+            border-radius: 7px;
+            border: 1px solid #0099D6;
+            font-weight: 700;
+            background-color: white;
+            color: #0099D6;
+            height: 2.6rem;
+        }
 
-    th:first-child {
-        text-align: left;
-    }
+        div.stButton > button:hover {
+            border-color: #f28c00;
+            color: #f28c00;
+        }
 
-    td {
-        padding: 0.35rem;
-        border-bottom: 1px solid #dddddd;
-        text-align: right;
-        color: #222222;
-    }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
 
-    td:first-child {
-        text-align: left;
-        background-color: #e6e6e6;
-    }
+        th {
+            background-color: #0099D6;
+            color: white;
+            padding: 0.55rem;
+            text-align: right;
+            font-weight: 700;
+        }
 
-    tr.total-row td {
-        background-color: #d9d9d9;
-        font-weight: 700;
-    }
-</style>
-""", unsafe_allow_html=True)
+        th:first-child {
+            text-align: left;
+        }
+
+        td {
+            padding: 0.55rem;
+            border-bottom: 1px solid #dddddd;
+            text-align: right;
+            color: #222222;
+        }
+
+        td:first-child {
+            text-align: left;
+            background-color: #e6e6e6;
+            font-weight: 600;
+        }
+
+        tr.total-row td {
+            background-color: #d9d9d9;
+            font-weight: 800;
+        }
+
+        .arpu-table {
+            max-width: 420px;
+        }
+
+        .stPlotlyChart {
+            background-color: white;
+            border-radius: 8px;
+        }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 
 # --------------------------------------------------
-# Sidebar
+# SIDEBAR
 # --------------------------------------------------
 
 with st.sidebar:
     st.markdown('<div class="logo-box">ė</div>', unsafe_allow_html=True)
+
     st.markdown('<div class="orange-button">Ricavi Ricorrenti</div>', unsafe_allow_html=True)
     st.markdown('<div class="white-button">Ricavi One-Off</div>', unsafe_allow_html=True)
 
@@ -193,7 +237,7 @@ with st.sidebar:
 
 
 # --------------------------------------------------
-# Mock data
+# DATI MOCK
 # --------------------------------------------------
 
 months = [
@@ -206,58 +250,66 @@ retail = np.array([16.30, 16.50, 16.45, 16.47, 16.38, 16.60, 16.44, 16.34, 16.26
 wholesale = np.array([2.94, 2.80, 2.81, 2.79, 2.76, 2.77, 2.80, 2.84, 2.80, 2.76, 2.74, 2.70])
 totale = retail + wholesale
 
-arpu_retail = np.array([26.5, 26.5, 26.4, 26.6, 26.5, 26.5, 26.5, 26.5, 26.5, 26.5, 26.5, 26.45])
-arpu_wholesale = np.array([48.8, 48.9, 48.8, 48.9, 48.8, 48.8, 48.7, 48.8, 48.8, 48.9, 48.8, 48.86])
-arpu_totale = np.array([28.2, 28.2, 28.2, 28.2, 28.2, 28.3, 28.2, 28.2, 28.2, 28.2, 28.2, 28.29])
+arpu_retail = np.array([26.50, 26.50, 26.40, 26.60, 26.50, 26.50, 26.50, 26.50, 26.50, 26.50, 26.50, 26.45])
+arpu_wholesale = np.array([48.80, 48.90, 48.80, 48.90, 48.80, 48.80, 48.70, 48.80, 48.80, 48.90, 48.80, 48.86])
+arpu_totale = np.array([28.20, 28.20, 28.20, 28.20, 28.20, 28.30, 28.20, 28.20, 28.20, 28.20, 28.20, 28.29])
 
-df_month = pd.DataFrame({
-    "Mese": months,
-    "Retail": retail,
-    "Wholesale": wholesale,
-    "Totale": totale,
-    "ARPU Retail": arpu_retail,
-    "ARPU Wholesale": arpu_wholesale,
-    "ARPU Totale": arpu_totale
-})
+df_month = pd.DataFrame(
+    {
+        "Mese": months,
+        "Retail": retail,
+        "Wholesale": wholesale,
+        "Totale": totale,
+        "ARPU Retail": arpu_retail,
+        "ARPU Wholesale": arpu_wholesale,
+        "ARPU Totale": arpu_totale,
+    }
+)
 
 
 # --------------------------------------------------
-# Helper functions
+# FUNZIONI KPI
 # --------------------------------------------------
 
 def sparkline(values):
     fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        y=values,
-        mode="lines",
-        fill="tozeroy",
-        line=dict(width=2),
-        hoverinfo="skip"
-    ))
+
+    fig.add_trace(
+        go.Scatter(
+            y=values,
+            mode="lines",
+            fill="tozeroy",
+            line=dict(width=2, color="#0067A6"),
+            fillcolor="rgba(0, 103, 166, 0.25)",
+            hoverinfo="skip"
+        )
+    )
+
     fig.update_layout(
-        height=55,
+        height=65,
         margin=dict(l=0, r=0, t=0, b=0),
         xaxis=dict(visible=False),
         yaxis=dict(visible=False),
         paper_bgcolor="white",
         plot_bgcolor="white"
     )
+
     return fig
 
 
 def kpi_card(title, value, values=None):
-    left, right = st.columns([1.15, 0.85])
+    col1, col2 = st.columns([1.2, 1])
 
-    with left:
+    with col1:
         st.markdown(
             f"""
-            <div class="card-title">{title}</div>
-            <div class="card-value">{value}</div>
+            <div class="kpi-title">{title}</div>
+            <div class="kpi-value">{value}</div>
             """,
             unsafe_allow_html=True
         )
 
-    with right:
+    with col2:
         if values is not None:
             st.plotly_chart(
                 sparkline(values),
@@ -266,25 +318,31 @@ def kpi_card(title, value, values=None):
             )
 
 
-def simple_card(title_1, value_1, title_2, value_2):
+def double_kpi_card(title_1, value_1, title_2, value_2):
     c1, c2 = st.columns(2)
+
     with c1:
         st.markdown(
             f"""
-            <div class="card-title">{title_1}</div>
-            <div class="card-value">{value_1}</div>
-            """,
-            unsafe_allow_html=True
-        )
-    with c2:
-        st.markdown(
-            f"""
-            <div class="card-title">{title_2}</div>
-            <div class="card-value">{value_2}</div>
+            <div class="small-kpi-title">{title_1}</div>
+            <div class="small-kpi-value">{value_1}</div>
             """,
             unsafe_allow_html=True
         )
 
+    with c2:
+        st.markdown(
+            f"""
+            <div class="small-kpi-title">{title_2}</div>
+            <div class="small-kpi-value">{value_2}</div>
+            """,
+            unsafe_allow_html=True
+        )
+
+
+# --------------------------------------------------
+# FUNZIONI TABELLE
+# --------------------------------------------------
 
 def money_table():
     data = [
@@ -294,76 +352,99 @@ def money_table():
     ]
 
     columns = [
-        "BU", "ail", "DigitalPush", "Business", "SMALL TELCO",
-        "TOP TELCO", "BIG OLO", "", "Totale"
+        "BU",
+        "ail",
+        "DigitalPush",
+        "Business",
+        "SMALL TELCO",
+        "TOP TELCO",
+        "BIG OLO",
+        "",
+        "Totale"
     ]
 
-    html = "<table><thead><tr>"
+    html = '<table>'
+    html += '<thead><tr>'
+
     for col in columns:
-        html += f"<th>{col}</th>"
-    html += "</tr></thead><tbody>"
+        html += f'<th>{col}</th>'
+
+    html += '</tr></thead>'
+    html += '<tbody>'
 
     for row in data:
         cls = "total-row" if row[0] == "Totale" else ""
-        html += f"<tr class='{cls}'>"
-        for cell in row:
-            html += f"<td>{cell}</td>"
-        html += "</tr>"
+        html += f'<tr class="{cls}">'
 
-    html += "</tbody></table>"
+        for cell in row:
+            html += f'<td>{cell}</td>'
+
+        html += '</tr>'
+
+    html += '</tbody></table>'
+
     st.markdown(html, unsafe_allow_html=True)
 
 
 def arpu_table():
     data = [
-        ("RETAIL", "26,45"),
-        ("WHOLESALE", "48,86"),
-        ("Totale", "28,29"),
+        ["RETAIL", "26,45"],
+        ["WHOLESALE", "48,86"],
+        ["Totale", "28,29"],
     ]
 
+    columns = ["BU", "ARPU CB"]
+
     html = '<table class="arpu-table">'
-    html += '<thead><tr><th>BU</th><th>ARPU CB</th></tr></thead>'
+    html += '<thead><tr>'
+
+    for col in columns:
+        html += f'<th>{col}</th>'
+
+    html += '</tr></thead>'
     html += '<tbody>'
 
-    for bu_name, value in data:
-        cls = "total-row" if bu_name == "Totale" else ""
-        html += f'<tr class="{cls}"><td>{bu_name}</td><td>{value}</td></tr>'
+    for row in data:
+        cls = "total-row" if row[0] == "Totale" else ""
+        html += f'<tr class="{cls}">'
+
+        for cell in row:
+            html += f'<td>{cell}</td>'
+
+        html += '</tr>'
 
     html += '</tbody></table>'
 
     st.markdown(html, unsafe_allow_html=True)
+
+
+# --------------------------------------------------
+# FUNZIONI GRAFICI
+# --------------------------------------------------
+
 def ricavi_chart(df):
     fig = go.Figure()
 
-    fig.add_trace(go.Bar(
-        x=df["Mese"],
-        y=df["Retail"],
-        name="RETAIL",
-        text=[f"{v:.0f}..." for v in df["Retail"]],
-        textposition="inside"
-    ))
+    fig.add_trace(
+        go.Bar(
+            x=df["Mese"],
+            y=df["Retail"],
+            name="RETAIL",
+            marker_color="#0067A6",
+            text=[f"{v:.1f}" for v in df["Retail"]],
+            textposition="inside"
+        )
+    )
 
-    fig.add_trace(go.Bar(
-        x=df["Mese"],
-        y=df["Wholesale"],
-        name="WHOLESALE"
-    ))
-
-    fig.update_layout(
-        barmode="stack",
-        height=285,
-        margin=dict(l=10, r=10, t=10, b=10),
-        legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=1.02,
-            xanchor="left",
-            x=0
-        ),
-        yaxis=dict(visible=False),
-        xaxis=dict(tickfont=dict(size=10)),
-        paper_bgcolor="white",
-        plot_bgcolor="white"
+    fig.add_trace(
+        go.Bar(
+            x=df["Mese"],
+            y=df["Wholesale"],
+            name="WHOLESALE",
+            marker_color="#F2C94C",
+            text=[f"{v:.1f}" for v in df["Wholesale"]],
+            textposition="inside"
+        )
     )
 
     for i, total_value in enumerate(df["Totale"]):
@@ -372,38 +453,13 @@ def ricavi_chart(df):
             y=total_value + 0.25,
             text=f"{total_value:.3f}",
             showarrow=False,
-            font=dict(size=10, color="#666666")
+            font=dict(size=11, color="#666666")
         )
 
-    return fig
-
-
-def arpu_chart(df):
-    fig = go.Figure()
-
-    fig.add_trace(go.Bar(
-        x=df["Mese"],
-        y=df["ARPU Retail"],
-        name="Retail"
-    ))
-
-    fig.add_trace(go.Bar(
-        x=df["Mese"],
-        y=df["ARPU Wholesale"],
-        name="Wholesale"
-    ))
-
-    fig.add_trace(go.Scatter(
-        x=df["Mese"],
-        y=df["ARPU Totale"],
-        name="Totale",
-        mode="lines+markers",
-        line=dict(width=3)
-    ))
-
     fig.update_layout(
-        height=285,
-        margin=dict(l=10, r=10, t=10, b=10),
+        barmode="stack",
+        height=470,
+        margin=dict(l=10, r=10, t=20, b=30),
         legend=dict(
             orientation="h",
             yanchor="bottom",
@@ -411,8 +467,69 @@ def arpu_chart(df):
             xanchor="left",
             x=0
         ),
-        yaxis=dict(visible=False),
-        xaxis=dict(tickfont=dict(size=10)),
+        yaxis=dict(
+            visible=False,
+            range=[0, max(df["Totale"]) + 2]
+        ),
+        xaxis=dict(
+            tickfont=dict(size=11)
+        ),
+        paper_bgcolor="white",
+        plot_bgcolor="white"
+    )
+
+    return fig
+
+
+def arpu_chart(df):
+    fig = go.Figure()
+
+    fig.add_trace(
+        go.Bar(
+            x=df["Mese"],
+            y=df["ARPU Retail"],
+            name="Retail",
+            marker_color="#0067A6"
+        )
+    )
+
+    fig.add_trace(
+        go.Bar(
+            x=df["Mese"],
+            y=df["ARPU Wholesale"],
+            name="Wholesale",
+            marker_color="#F2C94C"
+        )
+    )
+
+    fig.add_trace(
+        go.Scatter(
+            x=df["Mese"],
+            y=df["ARPU Totale"],
+            name="Totale",
+            mode="lines+markers",
+            line=dict(width=3, color="#E67E22"),
+            marker=dict(size=7, color="#E67E22")
+        )
+    )
+
+    fig.update_layout(
+        height=470,
+        margin=dict(l=10, r=10, t=20, b=30),
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="left",
+            x=0
+        ),
+        yaxis=dict(
+            visible=False,
+            range=[0, max(df["ARPU Wholesale"]) + 8]
+        ),
+        xaxis=dict(
+            tickfont=dict(size=11)
+        ),
         paper_bgcolor="white",
         plot_bgcolor="white"
     )
@@ -421,7 +538,15 @@ def arpu_chart(df):
 
 
 # --------------------------------------------------
-# Header
+# STATO PAGINA
+# --------------------------------------------------
+
+if "pagina_dashboard" not in st.session_state:
+    st.session_state.pagina_dashboard = "Ricavi"
+
+
+# --------------------------------------------------
+# HEADER
 # --------------------------------------------------
 
 st.markdown(
@@ -434,122 +559,145 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-radio_col_1, radio_col_2 = st.columns([8, 1])
-with radio_col_2:
-    cb_type = st.radio(
-        "",
-        ["CB Netta", "CB Totale"],
-        horizontal=True,
-        label_visibility="collapsed"
-    )
+
+# --------------------------------------------------
+# BOTTONI NAVIGAZIONE
+# --------------------------------------------------
+
+nav1, nav2, nav_space = st.columns([1, 1, 6])
+
+with nav1:
+    if st.button("Pagina Ricavi", use_container_width=True):
+        st.session_state.pagina_dashboard = "Ricavi"
+
+with nav2:
+    if st.button("Pagina ARPU", use_container_width=True):
+        st.session_state.pagina_dashboard = "ARPU"
+
+
+st.markdown("<br>", unsafe_allow_html=True)
 
 
 # --------------------------------------------------
-# KPI row
+# PAGINA 1 - RICAVI
 # --------------------------------------------------
 
-kpi1, kpi2, kpi3, kpi4 = st.columns([1.35, 1.35, 1.35, 1.35])
+if st.session_state.pagina_dashboard == "Ricavi":
 
-with kpi1:
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    kpi_card("Ricavi Ricorrenti", "19,00Mln", totale)
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Ricavi</div>', unsafe_allow_html=True)
 
-with kpi2:
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    simple_card("Wholesale", "2,70Mln", "Retail", "16,30Mln")
-    st.markdown('</div>', unsafe_allow_html=True)
+    kpi_col1, kpi_col2 = st.columns(2)
 
-with kpi3:
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    kpi_card("ARPU CB Netta", "28,29", arpu_totale)
-    st.markdown('</div>', unsafe_allow_html=True)
+    with kpi_col1:
+        with st.container(border=True):
+            kpi_card("Ricavi Ricorrenti", "19,00Mln", totale)
 
-with kpi4:
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    simple_card("Wholesale", "48,86", "Retail", "26,45")
-    st.markdown('</div>', unsafe_allow_html=True)
+    with kpi_col2:
+        with st.container(border=True):
+            double_kpi_card("Wholesale", "2,70Mln", "Retail", "16,30Mln")
 
+    st.markdown("<br>", unsafe_allow_html=True)
 
-# --------------------------------------------------
-# Top detail row
-# --------------------------------------------------
+    with st.container(border=True):
+        head1, head2, head3 = st.columns([2.2, 0.7, 1])
 
-left_top, right_top = st.columns([1.08, 1.08])
+        with head1:
+            st.markdown(
+                '<div class="panel-title">Dettaglio Ricavi Ricorrenti</div>',
+                unsafe_allow_html=True
+            )
 
-with left_top:
-    st.markdown('<div class="panel">', unsafe_allow_html=True)
+        with head2:
+            st.markdown(
+                '<div class="small-caption">Righe: BU</div>',
+                unsafe_allow_html=True
+            )
 
-    c1, c2, c3 = st.columns([1.3, 0.55, 0.8])
-    with c1:
-        st.markdown('<div class="panel-title">Dettaglio Ricavi Ricorrenti</div>', unsafe_allow_html=True)
-    with c2:
-        st.markdown('<div class="small-caption">Righe: &nbsp; BU</div>', unsafe_allow_html=True)
-    with c3:
-        st.markdown('<div class="small-caption">Colonne: &nbsp; Canale</div>', unsafe_allow_html=True)
+        with head3:
+            st.markdown(
+                '<div class="small-caption">Colonne: Canale</div>',
+                unsafe_allow_html=True
+            )
 
-    money_table()
+        money_table()
 
-    st.markdown(
-        """
-        <div style="height:118px;"></div>
-        <div style="height:6px;background:#a8a8a8;border-radius:4px;margin:0 0.3rem;"></div>
-        """,
-        unsafe_allow_html=True
-    )
+    st.markdown("<br>", unsafe_allow_html=True)
 
-    st.markdown('</div>', unsafe_allow_html=True)
-
-with right_top:
-    st.markdown('<div class="panel">', unsafe_allow_html=True)
-
-    c1, c2, c3 = st.columns([1.4, 0.55, 0.9])
-    with c1:
-        st.markdown('<div class="panel-title">Dettaglio ARPU CB Netta</div>', unsafe_allow_html=True)
-    with c2:
-        st.markdown('<div class="small-caption">Righe: &nbsp; BU</div>', unsafe_allow_html=True)
-    with c3:
-        st.markdown('<div class="small-caption">Colonne: &nbsp; Nessuna s...</div>', unsafe_allow_html=True)
-
-    arpu_table()
-
-    st.markdown('<div style="height:170px;"></div>', unsafe_allow_html=True)
-
-    st.markdown('</div>', unsafe_allow_html=True)
-
-
-# --------------------------------------------------
-# Bottom chart row
-# --------------------------------------------------
-
-left_bottom, right_bottom = st.columns([1.08, 1.08])
-
-with left_bottom:
-    st.markdown('<div class="panel">', unsafe_allow_html=True)
-    st.markdown('<div class="panel-title">Ricavi per BU (k€)</div>', unsafe_allow_html=True)
-    st.plotly_chart(
-        ricavi_chart(df_month),
-        use_container_width=True,
-        config={"displayModeBar": False}
-    )
-    st.markdown('</div>', unsafe_allow_html=True)
-
-with right_bottom:
-    st.markdown('<div class="panel">', unsafe_allow_html=True)
-
-    c1, c2 = st.columns([1.5, 0.5])
-    with c1:
-        st.markdown('<div class="panel-title">ARPU CB Netta per Mese</div>', unsafe_allow_html=True)
-    with c2:
+    with st.container(border=True):
         st.markdown(
-            '<div class="small-caption">○ Geografica &nbsp;&nbsp; ● Temporale</div>',
+            '<div class="panel-title">Ricavi per BU (k€)</div>',
             unsafe_allow_html=True
         )
 
-    st.plotly_chart(
-        arpu_chart(df_month),
-        use_container_width=True,
-        config={"displayModeBar": False}
-    )
+        st.plotly_chart(
+            ricavi_chart(df_month),
+            use_container_width=True,
+            config={"displayModeBar": False}
+        )
 
-    st.markdown('</div>', unsafe_allow_html=True)
+
+# --------------------------------------------------
+# PAGINA 2 - ARPU
+# --------------------------------------------------
+
+else:
+
+    st.markdown('<div class="section-title">ARPU</div>', unsafe_allow_html=True)
+
+    kpi_col1, kpi_col2 = st.columns(2)
+
+    with kpi_col1:
+        with st.container(border=True):
+            kpi_card("ARPU CB Netta", "28,29", arpu_totale)
+
+    with kpi_col2:
+        with st.container(border=True):
+            double_kpi_card("Wholesale", "48,86", "Retail", "26,45")
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    with st.container(border=True):
+        head1, head2, head3 = st.columns([2.2, 0.7, 1])
+
+        with head1:
+            st.markdown(
+                '<div class="panel-title">Dettaglio ARPU CB Netta</div>',
+                unsafe_allow_html=True
+            )
+
+        with head2:
+            st.markdown(
+                '<div class="small-caption">Righe: BU</div>',
+                unsafe_allow_html=True
+            )
+
+        with head3:
+            st.markdown(
+                '<div class="small-caption">Colonne: Nessuna selezione</div>',
+                unsafe_allow_html=True
+            )
+
+        arpu_table()
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    with st.container(border=True):
+        top1, top2 = st.columns([2.5, 1])
+
+        with top1:
+            st.markdown(
+                '<div class="panel-title">ARPU CB Netta per Mese</div>',
+                unsafe_allow_html=True
+            )
+
+        with top2:
+            st.markdown(
+                '<div class="small-caption">○ Geografica &nbsp;&nbsp; ● Temporale</div>',
+                unsafe_allow_html=True
+            )
+
+        st.plotly_chart(
+            arpu_chart(df_month),
+            use_container_width=True,
+            config={"displayModeBar": False}
+        )
