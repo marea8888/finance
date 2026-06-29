@@ -541,7 +541,7 @@ def ricavi_chart(df):
         go.Scatter(
             x=df["Mese"],
             y=df["Delta Totale k€"],
-            name="Scostamento totale vs primo mese",
+            name="Scostamento totale vs stesso mese FY prec.",
             mode="lines+markers",
             line=dict(
                 color=colore_delta,
