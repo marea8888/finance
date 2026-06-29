@@ -667,17 +667,17 @@ def ricavi_chart(df):
     delta_abs = max(abs(delta_min), abs(delta_max), 100)
 
     fig.update_yaxes(
-        visible=False,
-        showgrid=False,
-        zeroline=False,
-        range=[
-            delta_min - delta_abs * 1.4,
-            delta_max + delta_abs * 3.8
-        ],
-        secondary_y=True
-    )
+    visible=False,
+    showgrid=False,
+    zeroline=False,
+    range=[
+        delta_min - delta_abs * 2.0,
+        delta_max + delta_abs * 6.0
+    ],
+    secondary_y=True
+)
 
-    return fig
+return fig
 
 
 
