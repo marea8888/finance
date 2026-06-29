@@ -316,35 +316,22 @@ def money_table():
 
 def arpu_table():
     data = [
-        ["RETAIL", "26,45"],
-        ["WHOLESALE", "48,86"],
-        ["Totale", "28,29"],
+        ("RETAIL", "26,45"),
+        ("WHOLESALE", "48,86"),
+        ("Totale", "28,29"),
     ]
 
-    html = """
-    <table style="width:230px">
-        <thead>
-            <tr>
-                <th>BU</th>
-                <th>ARPU CB</th>
-            </tr>
-        </thead>
-        <tbody>
-    """
+    html = '<table class="arpu-table">'
+    html += '<thead><tr><th>BU</th><th>ARPU CB</th></tr></thead>'
+    html += '<tbody>'
 
     for bu_name, value in data:
         cls = "total-row" if bu_name == "Totale" else ""
-        html += f"""
-            <tr class="{cls}">
-                <td>{bu_name}</td>
-                <td>{value}</td>
-            </tr>
-        """
+        html += f'<tr class="{cls}"><td>{bu_name}</td><td>{value}</td></tr>'
 
-    html += "</tbody></table>"
+    html += '</tbody></table>'
+
     st.markdown(html, unsafe_allow_html=True)
-
-
 def ricavi_chart(df):
     fig = go.Figure()
 
