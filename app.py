@@ -156,14 +156,30 @@ st.markdown(
             border-radius: 7px;
             border: 1px solid #0099D6;
             font-weight: 700;
-            background-color: white;
-            color: #0099D6;
             height: 2.6rem;
         }
 
-        div.stButton > button:hover {
-            border-color: #f28c00;
-            color: #f28c00;
+        div.stButton > button[kind="primary"] {
+            background-color: #E11D48 !important;
+            color: white !important;
+            border: 1px solid #E11D48 !important;
+        }
+
+        div.stButton > button[kind="secondary"] {
+            background-color: white !important;
+            color: #0099D6 !important;
+            border: 1px solid #0099D6 !important;
+        }
+
+        div.stButton > button[kind="secondary"]:hover {
+            border-color: #E11D48 !important;
+            color: #E11D48 !important;
+        }
+
+        div.stButton > button[kind="primary"]:hover {
+            background-color: #BE123C !important;
+            color: white !important;
+            border-color: #BE123C !important;
         }
 
         table {
@@ -910,12 +926,22 @@ st.markdown(
 nav1, nav2, nav_space = st.columns([1, 1, 6])
 
 with nav1:
-    if st.button("Pagina Ricavi", use_container_width=True):
+    if st.button(
+        "Pagina Ricavi",
+        use_container_width=True,
+        type="primary" if st.session_state.pagina_dashboard == "Ricavi" else "secondary"
+    ):
         st.session_state.pagina_dashboard = "Ricavi"
+        st.rerun()
 
 with nav2:
-    if st.button("Pagina ARPU", use_container_width=True):
+    if st.button(
+        "Pagina ARPU",
+        use_container_width=True,
+        type="primary" if st.session_state.pagina_dashboard == "ARPU" else "secondary"
+    ):
         st.session_state.pagina_dashboard = "ARPU"
+        st.rerun()
 
 
 st.markdown("<br>", unsafe_allow_html=True)
