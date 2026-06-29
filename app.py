@@ -764,7 +764,7 @@ def arpu_chart(df):
         go.Scatter(
             x=df["Mese"],
             y=df["ARPU Totale"],
-            name="Totale",
+            name="Media",
             mode="lines+markers",
             line=dict(
                 color=colore_totale,
@@ -808,33 +808,7 @@ def arpu_chart(df):
             yshift=24
         )
 
-    # --------------------------------------------------
-    # Ultimo valore evidenziato
-    # --------------------------------------------------
-
-    ultimo_mese = df["Mese"].iloc[-1]
-    ultimo_totale = df["ARPU Totale"].iloc[-1]
-    primo_totale = df["ARPU Totale"].iloc[0]
-    delta = ultimo_totale - primo_totale
-
-    fig.add_annotation(
-        x=ultimo_mese,
-        y=ultimo_totale,
-        text=f"<b>{fmt_decimal(ultimo_totale, 1)}</b><br>{delta:+.1f} vs inizio".replace(".", ","),
-        showarrow=True,
-        arrowhead=2,
-        ax=-75,
-        ay=-60,
-        font=dict(
-            size=14,
-            color=colore_totale,
-            family="Arial"
-        ),
-        bgcolor="white",
-        bordercolor=colore_totale,
-        borderwidth=1,
-        borderpad=6
-    )
+   
 
     # --------------------------------------------------
     # Layout
