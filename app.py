@@ -563,13 +563,6 @@ def ricavi_chart(df):
         height=540,
         margin=dict(l=10, r=20, t=60, b=80),
 
-        title=dict(
-            text="Ricavi ricorrenti: composizione e variazione totale",
-            x=0,
-            xanchor="left",
-            font=dict(size=18)
-        ),
-
         legend=dict(
             orientation="h",
             yanchor="bottom",
