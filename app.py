@@ -579,37 +579,7 @@ def ricavi_chart(df):
             yshift=22 if delta_value >= 0 else -22
         )
 
-    # --------------------------------------------------
-    # Annotazione finale
-    # --------------------------------------------------
-
-    primo_totale = df["Totale k€"].iloc[0]
-    ultimo_totale = df["Totale k€"].iloc[-1]
-    delta_finale = df["Delta Totale k€"].iloc[-1]
-    delta_finale_pct = (ultimo_totale - primo_totale) / primo_totale * 100
-
-    fig.add_annotation(
-        x=df["Mese"].iloc[-1],
-        y=delta_finale,
-        yref="y2",
-        text=(
-            f"<b>{delta_finale:+,.0f}</b><br>"
-            f"{delta_finale_pct:+.1f}% vs inizio"
-        ).replace(",", "."),
-        showarrow=True,
-        arrowhead=2,
-        ax=-90,
-        ay=-60,
-        font=dict(
-            size=15,
-            color=colore_delta,
-            family="Arial"
-        ),
-        bgcolor="white",
-        bordercolor=colore_delta,
-        borderwidth=1,
-        borderpad=7
-    )
+   
 
     # --------------------------------------------------
     # Layout
