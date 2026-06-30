@@ -953,7 +953,7 @@ def arpu_chart(df):
         go.Scatter(
             x=df["Mese Label"],
             y=df["ARPU Totale"],
-            name="ARPU medioo",
+            name="ARPU medio (con scostamento rispetto al PY prec.)",
             mode="lines+markers",
             line=dict(
                 color=colore_media,
