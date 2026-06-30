@@ -674,25 +674,7 @@ def ricavi_chart(df):
     )
 
     return fig
-fig.add_trace(
-    go.Scatter(
-        x=df["Mese"],
-        y=df["Totale FY Prec k€"] + 3600,
-        name="Totale stesso mese FY prec.",
-        mode="lines",
-        line=dict(
-            color=colore_fy_prec,
-            width=3.2,
-            dash="dash"
-        ),
-        hovertemplate=(
-            "<b>%{x}</b><br>"
-            "Totale stesso mese FY prec.: %{customdata:,.0f}<extra></extra>"
-        ),
-        customdata=df["Totale FY Prec k€"]
-    )
-)
-    
+
 
 def arpu_chart(df):
     fig = go.Figure()
