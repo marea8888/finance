@@ -456,7 +456,7 @@ def ricavi_chart(df):
     # Colori stile grafico iniziale
     colore_retail = "#005B96"        # blu scuro
     colore_wholesale = "#F2C94C"     # giallo chiaro
-    colore_fy_prec = "#6B7280"       # grigio tratteggiato
+    colore_trend = "#8A8F98"         # grigio trendline
     colore_testo = "#111827"
 
     # --------------------------------------------------
@@ -469,9 +469,8 @@ def ricavi_chart(df):
 
     # --------------------------------------------------
     # Totale stesso mese FY precedente
-    # --------------------------------------------------
     # In produzione questa colonna dovrà arrivare dal dataset.
-    # Se non trova il dato reale, usa valori mock solo per non rompere il grafico.
+    # Se non trova il dato reale, usa valori mock temporanei.
     # --------------------------------------------------
 
     if "Totale FY Prec k€" in df.columns:
@@ -488,6 +487,15 @@ def ricavi_chart(df):
         df["Totale FY Prec k€"] = df["Totale k€"] * np.array(
             [1.012, 1.006, 1.000, 0.995, 1.004, 0.998, 1.010, 1.006, 1.002, 0.997, 1.005, 1.004]
         )
+
+    # --------------------------------------------------
+    # Linea di tendenza stile Excel
+    # Calcolata sui valori del totale FY precedente
+    # --------------------------------------------------
+
+    x_num = np.arange(len(df))
+    coeff = np.polyfit(x_num, df["Totale FY Prec k€"], deg=1)
+    trend_fy_prec = np.polyval(coeff, x_num)
 
     # --------------------------------------------------
     # Testi assoluti dentro le barre
@@ -529,7 +537,7 @@ def ricavi_chart(df):
             ),
             hovertemplate=(
                 "<b>%{x}</b><br>"
-                "Retail: %{text}<extra></extra>"
+                "Retail: %{y:,.0f}<extra></extra>"
             )
         )
     )
@@ -560,7 +568,7 @@ def ricavi_chart(df):
             ),
             hovertemplate=(
                 "<b>%{x}</b><br>"
-                "Wholesale: %{text}<extra></extra>"
+                "Wholesale: %{y:,.0f}<extra></extra>"
             )
         )
     )
@@ -583,45 +591,24 @@ def ricavi_chart(df):
         )
 
     # --------------------------------------------------
-    # Curva FY precedente
-    # Solo linea grigia tratteggiata, senza punti e senza box.
-    # La curva viene alzata visivamente sopra i totaloni.
+    # Trendline FY precedente
+    # Disegnata sulla scala reale, quindi in mezzo alle barre
     # --------------------------------------------------
 
-    # --------------------------------------------------
-    # Linea di tendenza FY precedente
-    # Calcolata come trendline lineare, stile Excel
-    # --------------------------------------------------
-    
-    x_num = np.arange(len(df))
-    
-    coeff = np.polyfit(
-        x_num,
-        df["Totale FY Prec k€"],
-        deg=1
-    )
-    
-    trend_fy_prec = np.polyval(coeff, x_num)
-    
-    # La linea viene alzata solo graficamente per stare sopra i totaloni.
-    # Il valore reale resta disponibile nell'hover tramite customdata.
-    trend_offset = 3600
-    
     fig.add_trace(
         go.Scatter(
             x=df["Mese"],
-            y=trend_fy_prec + trend_offset,
+            y=trend_fy_prec,
             name="Trend totale stesso mese FY prec.",
             mode="lines",
             line=dict(
-                color=colore_fy_prec,
-                width=3.5
+                color=colore_trend,
+                width=4
             ),
             hovertemplate=(
                 "<b>%{x}</b><br>"
-                "Trend FY prec.: %{customdata:,.0f}<extra></extra>"
-            ),
-            customdata=trend_fy_prec
+                "Trend FY prec.: %{y:,.0f}<extra></extra>"
+            )
         )
     )
 
@@ -631,7 +618,7 @@ def ricavi_chart(df):
 
     valore_massimo = max(
         df["Totale k€"].max(),
-        (df["Totale FY Prec k€"] + 3600).max()
+        trend_fy_prec.max()
     )
 
     fig.update_layout(
@@ -653,10 +640,8 @@ def ricavi_chart(df):
         ),
 
         hovermode="x unified",
-
         paper_bgcolor="white",
         plot_bgcolor="white",
-
         uniformtext=dict(
             mode="show",
             minsize=11
