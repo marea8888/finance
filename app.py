@@ -448,7 +448,232 @@ def arpu_table():
 # Solo linea grigia tratteggiata, senza punti e senza box.
 # La curva viene alzata visivamente sopra i totaloni.
 # --------------------------------------------------
+def ricavi_chart(df):
+    fig = go.Figure()
 
+    df = df.copy()
+
+    # Colori stile grafico iniziale
+    colore_retail = "#005B96"        # blu scuro
+    colore_wholesale = "#F2C94C"     # giallo chiaro
+    colore_fy_prec = "#6B7280"       # grigio tratteggiato
+    colore_testo = "#111827"
+
+    # --------------------------------------------------
+    # Conversione in k€
+    # --------------------------------------------------
+
+    df["Retail k€"] = df["Retail"] * 1000
+    df["Wholesale k€"] = df["Wholesale"] * 1000
+    df["Totale k€"] = df["Totale"] * 1000
+
+    # --------------------------------------------------
+    # Totale stesso mese FY precedente
+    # --------------------------------------------------
+    # In produzione questa colonna dovrà arrivare dal dataset.
+    # Se non trova il dato reale, usa valori mock solo per non rompere il grafico.
+    # --------------------------------------------------
+
+    if "Totale FY Prec k€" in df.columns:
+        df["Totale FY Prec k€"] = df["Totale FY Prec k€"]
+
+    elif "Totale FY Prec" in df.columns:
+        df["Totale FY Prec k€"] = df["Totale FY Prec"] * 1000
+
+    elif "Totale FY precedente" in df.columns:
+        df["Totale FY Prec k€"] = df["Totale FY precedente"] * 1000
+
+    else:
+        # MOCK temporaneo: da sostituire con dato reale FY precedente
+        df["Totale FY Prec k€"] = df["Totale k€"] * np.array(
+            [1.012, 1.006, 1.000, 0.995, 1.004, 0.998, 1.010, 1.006, 1.002, 0.997, 1.005, 1.004]
+        )
+
+    # --------------------------------------------------
+    # Testi assoluti dentro le barre
+    # --------------------------------------------------
+
+    retail_text = [
+        f"{v:,.0f}".replace(",", ".")
+        for v in df["Retail k€"]
+    ]
+
+    wholesale_text = [
+        f"{v:,.0f}".replace(",", ".")
+        for v in df["Wholesale k€"]
+    ]
+
+    # --------------------------------------------------
+    # Barre Retail FY corrente
+    # --------------------------------------------------
+
+    fig.add_trace(
+        go.Bar(
+            x=df["Mese"],
+            y=df["Retail k€"],
+            name="Retail",
+            marker=dict(
+                color=colore_retail,
+                line=dict(
+                    color="rgba(255,255,255,0.45)",
+                    width=1
+                )
+            ),
+            text=retail_text,
+            textposition="inside",
+            insidetextanchor="middle",
+            textfont=dict(
+                size=15,
+                color="white",
+                family="Arial"
+            ),
+            hovertemplate=(
+                "<b>%{x}</b><br>"
+                "Retail: %{text}<extra></extra>"
+            )
+        )
+    )
+
+    # --------------------------------------------------
+    # Barre Wholesale FY corrente
+    # --------------------------------------------------
+
+    fig.add_trace(
+        go.Bar(
+            x=df["Mese"],
+            y=df["Wholesale k€"],
+            name="Wholesale",
+            marker=dict(
+                color=colore_wholesale,
+                line=dict(
+                    color="rgba(255,255,255,0.45)",
+                    width=1
+                )
+            ),
+            text=wholesale_text,
+            textposition="inside",
+            insidetextanchor="middle",
+            textfont=dict(
+                size=13,
+                color="#111827",
+                family="Arial"
+            ),
+            hovertemplate=(
+                "<b>%{x}</b><br>"
+                "Wholesale: %{text}<extra></extra>"
+            )
+        )
+    )
+
+    # --------------------------------------------------
+    # Totalone FY corrente sopra ogni istogramma
+    # --------------------------------------------------
+
+    for _, row in df.iterrows():
+        fig.add_annotation(
+            x=row["Mese"],
+            y=row["Totale k€"] + 1800,
+            text=f"<b>{row['Totale k€']:,.0f}</b>".replace(",", "."),
+            showarrow=False,
+            font=dict(
+                size=22,
+                color=colore_testo,
+                family="Arial Black"
+            )
+        )
+
+    # --------------------------------------------------
+    # Curva FY precedente
+    # Solo linea grigia tratteggiata, senza punti e senza box.
+    # La curva viene alzata visivamente sopra i totaloni.
+    # --------------------------------------------------
+
+    fig.add_trace(
+        go.Scatter(
+            x=df["Mese"],
+            y=df["Totale FY Prec k€"] + 3600,
+            name="Totale stesso mese FY prec.",
+            mode="lines",
+            line=dict(
+                color=colore_fy_prec,
+                width=3.2,
+                dash="dash"
+            ),
+            hovertemplate=(
+                "<b>%{x}</b><br>"
+                "Totale stesso mese FY prec.: %{customdata:,.0f}<extra></extra>"
+            ),
+            customdata=df["Totale FY Prec k€"]
+        )
+    )
+
+    # --------------------------------------------------
+    # Layout
+    # --------------------------------------------------
+
+    valore_massimo = max(
+        df["Totale k€"].max(),
+        (df["Totale FY Prec k€"] + 3600).max()
+    )
+
+    fig.update_layout(
+        barmode="stack",
+        height=610,
+        margin=dict(l=10, r=25, t=115, b=105),
+
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.03,
+            xanchor="left",
+            x=0,
+            font=dict(
+                size=13,
+                color=colore_testo,
+                family="Arial"
+            )
+        ),
+
+        hovermode="x unified",
+
+        paper_bgcolor="white",
+        plot_bgcolor="white",
+
+        uniformtext=dict(
+            mode="show",
+            minsize=11
+        )
+    )
+
+    # --------------------------------------------------
+    # Asse X
+    # --------------------------------------------------
+
+    fig.update_xaxes(
+        tickangle=-25,
+        tickfont=dict(
+            size=15,
+            color=colore_testo,
+            family="Arial"
+        ),
+        showline=False,
+        showgrid=False,
+        zeroline=False,
+        automargin=True
+    )
+
+    # --------------------------------------------------
+    # Asse Y nascosto
+    # --------------------------------------------------
+
+    fig.update_yaxes(
+        visible=False,
+        showgrid=False,
+        zeroline=False,
+        range=[0, valore_massimo + 4800]
+    )
+
+    return fig
 fig.add_trace(
     go.Scatter(
         x=df["Mese"],
