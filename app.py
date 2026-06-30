@@ -830,8 +830,48 @@ def arpu_chart(df):
     def fmt_decimal(value, decimals=1):
         return f"{value:.{decimals}f}".replace(".", ",")
 
+    def fmt_delta(value, decimals=1):
+        if value >= 0:
+            return f"+{value:.{decimals}f}".replace(".", ",")
+        else:
+            return f"{value:.{decimals}f}".replace(".", ",")
+
+    # --------------------------------------------------
     # Label asse X su due righe: 2025 / Apr
+    # --------------------------------------------------
+
     df["Mese Label"] = df["Mese"].str.replace(" ", "<br>")
+
+    # --------------------------------------------------
+    # ARPU PY
+    # In produzione questa colonna dovrà arrivare dal dataset.
+    # Se non trova il dato reale, usa valori mock temporanei.
+    # --------------------------------------------------
+
+    if "ARPU Totale PY" in df.columns:
+        df["ARPU Totale PY"] = df["ARPU Totale PY"]
+
+    elif "ARPU PY" in df.columns:
+        df["ARPU Totale PY"] = df["ARPU PY"]
+
+    elif "ARPU Totale FY Prec" in df.columns:
+        df["ARPU Totale PY"] = df["ARPU Totale FY Prec"]
+
+    elif "ARPU Totale FY precedente" in df.columns:
+        df["ARPU Totale PY"] = df["ARPU Totale FY precedente"]
+
+    else:
+        # MOCK temporaneo: da sostituire con dato reale PY
+        df["ARPU Totale PY"] = df["ARPU Totale"] - np.array(
+            [0.2, 0.1, 0.0, 0.3, 0.1, 0.2, -0.1, 0.0, 0.1, -0.1, 0.0, 0.2]
+        )
+
+    # --------------------------------------------------
+    # Scostamento assoluto ARPU corrente vs PY
+    # Formula: ARPU corrente - ARPU PY
+    # --------------------------------------------------
+
+    df["Delta ARPU vs PY"] = df["ARPU Totale"] - df["ARPU Totale PY"]
 
     retail_text = [
         fmt_decimal(v, 1)
@@ -929,10 +969,54 @@ def arpu_chart(df):
             ),
             hovertemplate=(
                 "<b>%{x}</b><br>"
-                "ARPU medio: %{y:.1f}<extra></extra>"
-            )
+                "ARPU medio: %{y:.1f}<br>"
+                "Delta vs PY: %{customdata:+.1f}<extra></extra>"
+            ),
+            customdata=df["Delta ARPU vs PY"]
         )
     )
+
+    # --------------------------------------------------
+    # Box su ogni punto della curva
+    # Valore assoluto ARPU corrente + scostamento assoluto vs PY
+    # --------------------------------------------------
+
+    for _, row in df.iterrows():
+        valore_arpu = row["ARPU Totale"]
+        delta_arpu = row["Delta ARPU vs PY"]
+
+        testo_box = (
+            f"{fmt_decimal(valore_arpu, 1)} "
+            f"({fmt_delta(delta_arpu, 1)})"
+        )
+
+        if delta_arpu >= 0:
+            colore_box = "#DCFCE7"
+            colore_bordo = "#16A34A"
+            colore_font = "#166534"
+            y_shift = 26
+        else:
+            colore_box = "#FEE2E2"
+            colore_bordo = "#DC2626"
+            colore_font = "#991B1B"
+            y_shift = -26
+
+        fig.add_annotation(
+            x=row["Mese Label"],
+            y=valore_arpu,
+            text=f"<b>{testo_box}</b>",
+            showarrow=False,
+            font=dict(
+                size=13,
+                color=colore_font,
+                family="Arial Black"
+            ),
+            bgcolor=colore_box,
+            bordercolor=colore_bordo,
+            borderwidth=1,
+            borderpad=5,
+            yshift=y_shift
+        )
 
     # --------------------------------------------------
     # Layout
@@ -947,7 +1031,7 @@ def arpu_chart(df):
     fig.update_layout(
         barmode="group",
         height=600,
-        margin=dict(l=10, r=25, t=95, b=105),
+        margin=dict(l=10, r=25, t=105, b=105),
 
         bargap=0.28,
         bargroupgap=0.08,
@@ -1001,7 +1085,7 @@ def arpu_chart(df):
         visible=False,
         showgrid=False,
         zeroline=False,
-        range=[0, valore_max + 10]
+        range=[0, valore_max + 14]
     )
 
     return fig
