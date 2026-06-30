@@ -61,9 +61,9 @@ st.markdown(
         }
 
         .orange-button {
-            background-color: #f28c00;
+            background-color: #F28C00;
             border-radius: 5px;
-            padding: 0.55rem;
+            padding: 0.70rem;
             text-align: center;
             color: white;
             font-weight: 700;
@@ -73,9 +73,9 @@ st.markdown(
         .white-button {
             background-color: white;
             border-radius: 5px;
-            padding: 0.55rem;
+            padding: 0.70rem;
             text-align: center;
-            color: #00A3D9 !important;
+            color: #0099D6 !important;
             font-weight: 700;
             margin: 0.35rem 0 1rem 0;
         }
@@ -105,14 +105,6 @@ st.markdown(
             color: #2a2a2a;
             margin-top: 0.5rem;
             margin-bottom: 0.7rem;
-        }
-
-        .kpi-card {
-            background-color: white;
-            border-radius: 10px;
-            padding: 1rem 1.2rem;
-            min-height: 105px;
-            box-shadow: 0 0 0 1px rgba(0,0,0,0.05);
         }
 
         .kpi-title {
@@ -152,34 +144,46 @@ st.markdown(
             padding-top: 0.2rem;
         }
 
+        /* --------------------------------------------------
+           BOTTONI PAGINA RICAVI / PAGINA ARPU
+           Stile coerente con Ricavi Ricorrenti / Ricavi One-Off
+        -------------------------------------------------- */
+
         div.stButton > button {
-            border-radius: 7px;
-            border: 1px solid #0099D6;
+            border-radius: 6px;
+            border: none;
             font-weight: 700;
-            height: 2.6rem;
+            font-size: 15px;
+            height: 3rem;
+            box-shadow: none !important;
         }
 
         div.stButton > button[kind="primary"] {
-            background-color: #E11D48 !important;
+            background-color: #F28C00 !important;
             color: white !important;
-            border: 1px solid #E11D48 !important;
+            border: 1px solid #F28C00 !important;
+        }
+
+        div.stButton > button[kind="primary"]:hover {
+            background-color: #E07F00 !important;
+            color: white !important;
+            border: 1px solid #E07F00 !important;
         }
 
         div.stButton > button[kind="secondary"] {
             background-color: white !important;
             color: #0099D6 !important;
-            border: 1px solid #0099D6 !important;
+            border: 1px solid white !important;
         }
 
         div.stButton > button[kind="secondary"]:hover {
-            border-color: #E11D48 !important;
-            color: #E11D48 !important;
+            background-color: #F7FBFD !important;
+            color: #007FB3 !important;
+            border: 1px solid white !important;
         }
 
-        div.stButton > button[kind="primary"]:hover {
-            background-color: #BE123C !important;
-            color: white !important;
-            border-color: #BE123C !important;
+        div.stButton > button:focus {
+            box-shadow: none !important;
         }
 
         table {
@@ -444,15 +448,10 @@ def ricavi_chart(df):
 
     df = df.copy()
 
-    # Palette moderna
-    colore_retail = "#2563EB"        # blu elettrico
-    colore_wholesale = "#00BFA6"     # teal/acqua
-    colore_delta = "#E11D48"         # rosso/magenta trend
+    colore_retail = "#2563EB"
+    colore_wholesale = "#00BFA6"
+    colore_delta = "#E11D48"
     colore_testo = "#111827"
-
-    # --------------------------------------------------
-    # Conversione in k€
-    # --------------------------------------------------
 
     df["Retail k€"] = df["Retail"] * 1000
     df["Wholesale k€"] = df["Wholesale"] * 1000
@@ -466,11 +465,6 @@ def ricavi_chart(df):
     retail_text = [f"{v:.0f}%" for v in df["Perc Retail"]]
     wholesale_text = [f"{v:.0f}%" for v in df["Perc Wholesale"]]
 
-    # --------------------------------------------------
-    # Barre Retail
-    # Percentuale in basso nel primo segmento
-    # --------------------------------------------------
-
     fig.add_trace(
         go.Bar(
             x=df["Mese"],
@@ -478,19 +472,12 @@ def ricavi_chart(df):
             name="Retail",
             marker=dict(
                 color=colore_retail,
-                line=dict(
-                    color="rgba(255,255,255,0.45)",
-                    width=1
-                )
+                line=dict(color="rgba(255,255,255,0.45)", width=1)
             ),
             text=retail_text,
             textposition="inside",
             insidetextanchor="start",
-            textfont=dict(
-                size=18,
-                color="white",
-                family="Arial"
-            ),
+            textfont=dict(size=18, color="white", family="Arial"),
             hovertemplate=(
                 "<b>%{x}</b><br>"
                 "Retail: %{y:,.0f}<br>"
@@ -500,10 +487,6 @@ def ricavi_chart(df):
         secondary_y=False
     )
 
-    # --------------------------------------------------
-    # Barre Wholesale
-    # --------------------------------------------------
-
     fig.add_trace(
         go.Bar(
             x=df["Mese"],
@@ -511,19 +494,12 @@ def ricavi_chart(df):
             name="Wholesale",
             marker=dict(
                 color=colore_wholesale,
-                line=dict(
-                    color="rgba(255,255,255,0.45)",
-                    width=1
-                )
+                line=dict(color="rgba(255,255,255,0.45)", width=1)
             ),
             text=wholesale_text,
             textposition="inside",
             insidetextanchor="middle",
-            textfont=dict(
-                size=18,
-                color="white",
-                family="Arial"
-            ),
+            textfont=dict(size=18, color="white", family="Arial"),
             hovertemplate=(
                 "<b>%{x}</b><br>"
                 "Wholesale: %{y:,.0f}<br>"
@@ -533,27 +509,17 @@ def ricavi_chart(df):
         secondary_y=False
     )
 
-    # --------------------------------------------------
-    # Linea trend: scostamento totale
-    # --------------------------------------------------
-
     fig.add_trace(
         go.Scatter(
             x=df["Mese"],
             y=df["Delta Totale k€"],
             name="Scostamento totale vs stesso mese FY prec.",
             mode="lines+markers",
-            line=dict(
-                color=colore_delta,
-                width=3.5
-            ),
+            line=dict(color=colore_delta, width=3.5),
             marker=dict(
                 size=10,
                 color=colore_delta,
-                line=dict(
-                    width=2.5,
-                    color="white"
-                )
+                line=dict(width=2.5, color="white")
             ),
             hovertemplate=(
                 "<b>%{x}</b><br>"
@@ -563,28 +529,15 @@ def ricavi_chart(df):
         secondary_y=True
     )
 
-    # --------------------------------------------------
-    # Totale sopra ogni istogramma
-    # Ancora più alto sopra le barre
-    # --------------------------------------------------
-
     for _, row in df.iterrows():
         fig.add_annotation(
             x=row["Mese"],
             y=row["Totale k€"] + 1800,
             text=f"<b>{row['Totale k€']:,.0f}</b>".replace(",", "."),
             showarrow=False,
-            font=dict(
-                size=22,
-                color=colore_testo,
-                family="Arial Black"
-            ),
+            font=dict(size=22, color=colore_testo, family="Arial Black"),
             yref="y1"
         )
-
-    # --------------------------------------------------
-    # Etichette rosse del delta
-    # --------------------------------------------------
 
     for _, row in df.iterrows():
         delta_value = row["Delta Totale k€"]
@@ -595,11 +548,7 @@ def ricavi_chart(df):
             yref="y2",
             text=f"<b>{delta_value:+,.0f}</b>".replace(",", "."),
             showarrow=False,
-            font=dict(
-                size=14,
-                color=colore_delta,
-                family="Arial Black"
-            ),
+            font=dict(size=14, color=colore_delta, family="Arial Black"),
             bgcolor="rgba(255,255,255,0.96)",
             bordercolor=colore_delta,
             borderwidth=1,
@@ -607,15 +556,10 @@ def ricavi_chart(df):
             yshift=24 if delta_value >= 0 else -24
         )
 
-    # --------------------------------------------------
-    # Layout
-    # --------------------------------------------------
-
     fig.update_layout(
         barmode="stack",
         height=610,
         margin=dict(l=10, r=25, t=110, b=105),
-
         legend=dict(
             orientation="h",
             yanchor="bottom",
@@ -624,39 +568,20 @@ def ricavi_chart(df):
             x=0,
             font=dict(size=13)
         ),
-
         hovermode="x unified",
-
         paper_bgcolor="white",
         plot_bgcolor="white",
-
-        uniformtext=dict(
-            mode="show",
-            minsize=14
-        )
+        uniformtext=dict(mode="show", minsize=14)
     )
-
-    # --------------------------------------------------
-    # Asse X più leggibile
-    # --------------------------------------------------
 
     fig.update_xaxes(
         tickangle=-25,
-        tickfont=dict(
-            size=15,
-            color="#111827",
-            family="Arial"
-        ),
+        tickfont=dict(size=15, color="#111827", family="Arial"),
         showline=False,
         showgrid=False,
         zeroline=False,
         automargin=True
     )
-
-    # --------------------------------------------------
-    # Asse Y ricavi nascosto
-    # Più spazio superiore per i totaloni
-    # --------------------------------------------------
 
     fig.update_yaxes(
         visible=False,
@@ -666,29 +591,22 @@ def ricavi_chart(df):
         secondary_y=False
     )
 
-    # --------------------------------------------------
-    # Asse Y delta nascosto
-    # Via di mezzo: evita sovrapposizioni ma non schiaccia troppo la linea
-    # --------------------------------------------------
-
     delta_min = df["Delta Totale k€"].min()
     delta_max = df["Delta Totale k€"].max()
     delta_abs = max(abs(delta_min), abs(delta_max), 100)
 
     fig.update_yaxes(
-    visible=False,
-    showgrid=False,
-    zeroline=False,
-    range=[
-        delta_min - delta_abs * 2,
-        delta_max + delta_abs * 2
-    ],
-    secondary_y=True
+        visible=False,
+        showgrid=False,
+        zeroline=False,
+        range=[
+            delta_min - delta_abs * 2,
+            delta_max + delta_abs * 2
+        ],
+        secondary_y=True
     )
-    
+
     return fig
-
-
 
 
 def arpu_chart(df):
@@ -696,23 +614,16 @@ def arpu_chart(df):
 
     df = df.copy()
 
-    # Stessa palette del grafico Ricavi
-    colore_retail = "#2563EB"        # blu elettrico
-    colore_wholesale = "#00BFA6"     # teal/acqua
-    colore_totale = "#E11D48"        # rosso/magenta
+    colore_retail = "#2563EB"
+    colore_wholesale = "#00BFA6"
+    colore_totale = "#E11D48"
     colore_testo = "#111827"
 
-    # Formattazione italiana con virgola decimale
     def fmt_decimal(value, decimals=1):
         return f"{value:.{decimals}f}".replace(".", ",")
 
     retail_text = [fmt_decimal(v, 1) for v in df["ARPU Retail"]]
     wholesale_text = [fmt_decimal(v, 1) for v in df["ARPU Wholesale"]]
-    totale_text = [fmt_decimal(v, 1) for v in df["ARPU Totale"]]
-
-    # --------------------------------------------------
-    # Barre Retail
-    # --------------------------------------------------
 
     fig.add_trace(
         go.Bar(
@@ -721,29 +632,18 @@ def arpu_chart(df):
             name="Retail",
             marker=dict(
                 color=colore_retail,
-                line=dict(
-                    color="rgba(255,255,255,0.45)",
-                    width=1
-                )
+                line=dict(color="rgba(255,255,255,0.45)", width=1)
             ),
             text=retail_text,
             textposition="inside",
             insidetextanchor="middle",
-            textfont=dict(
-                size=17,
-                color="white",
-                family="Arial"
-            ),
+            textfont=dict(size=17, color="white", family="Arial"),
             hovertemplate=(
                 "<b>%{x}</b><br>"
                 "ARPU Retail: %{text}<extra></extra>"
             )
         )
     )
-
-    # --------------------------------------------------
-    # Barre Wholesale
-    # --------------------------------------------------
 
     fig.add_trace(
         go.Bar(
@@ -752,19 +652,12 @@ def arpu_chart(df):
             name="Wholesale",
             marker=dict(
                 color=colore_wholesale,
-                line=dict(
-                    color="rgba(255,255,255,0.45)",
-                    width=1
-                )
+                line=dict(color="rgba(255,255,255,0.45)", width=1)
             ),
             text=wholesale_text,
             textposition="inside",
             insidetextanchor="middle",
-            textfont=dict(
-                size=17,
-                color="white",
-                family="Arial"
-            ),
+            textfont=dict(size=17, color="white", family="Arial"),
             hovertemplate=(
                 "<b>%{x}</b><br>"
                 "ARPU Wholesale: %{text}<extra></extra>"
@@ -772,39 +665,24 @@ def arpu_chart(df):
         )
     )
 
-    # --------------------------------------------------
-    # Linea Totale ARPU
-    # --------------------------------------------------
-
     fig.add_trace(
         go.Scatter(
             x=df["Mese"],
             y=df["ARPU Totale"],
             name="Media",
             mode="lines+markers",
-            line=dict(
-                color=colore_totale,
-                width=3.5
-            ),
+            line=dict(color=colore_totale, width=3.5),
             marker=dict(
                 size=10,
                 color=colore_totale,
-                line=dict(
-                    width=2.5,
-                    color="white"
-                )
+                line=dict(width=2.5, color="white")
             ),
             hovertemplate=(
                 "<b>%{x}</b><br>"
-                "ARPU Totale: %{y:.1f}<extra></extra>"
+                "ARPU Medio: %{y:.1f}<extra></extra>"
             )
         )
     )
-
-    # --------------------------------------------------
-    # Etichette della linea Totale
-    # Con sfondo bianco per non confondersi con le barre
-    # --------------------------------------------------
 
     for _, row in df.iterrows():
         fig.add_annotation(
@@ -812,11 +690,7 @@ def arpu_chart(df):
             y=row["ARPU Totale"],
             text=f"<b>{fmt_decimal(row['ARPU Totale'], 1)}</b>",
             showarrow=False,
-            font=dict(
-                size=14,
-                color=colore_totale,
-                family="Arial Black"
-            ),
+            font=dict(size=14, color=colore_totale, family="Arial Black"),
             bgcolor="rgba(255,255,255,0.96)",
             bordercolor=colore_totale,
             borderwidth=1,
@@ -824,61 +698,32 @@ def arpu_chart(df):
             yshift=24
         )
 
-   
-
-    # --------------------------------------------------
-    # Layout
-    # --------------------------------------------------
-
     fig.update_layout(
         barmode="group",
         height=600,
         margin=dict(l=10, r=25, t=100, b=105),
-
         legend=dict(
             orientation="h",
             yanchor="bottom",
             y=1.03,
             xanchor="left",
             x=0,
-            font=dict(
-                size=13,
-                color=colore_testo,
-                family="Arial"
-            )
+            font=dict(size=13, color=colore_testo, family="Arial")
         ),
-
         hovermode="x unified",
-
         paper_bgcolor="white",
         plot_bgcolor="white",
-
-        uniformtext=dict(
-            mode="show",
-            minsize=13
-        )
+        uniformtext=dict(mode="show", minsize=13)
     )
-
-    # --------------------------------------------------
-    # Asse X più leggibile
-    # --------------------------------------------------
 
     fig.update_xaxes(
         tickangle=-25,
-        tickfont=dict(
-            size=15,
-            color=colore_testo,
-            family="Arial"
-        ),
+        tickfont=dict(size=15, color=colore_testo, family="Arial"),
         showline=False,
         showgrid=False,
         zeroline=False,
         automargin=True
     )
-
-    # --------------------------------------------------
-    # Asse Y nascosto, ma con spazio sopra
-    # --------------------------------------------------
 
     valore_max = max(
         df["ARPU Retail"].max(),
@@ -923,7 +768,7 @@ st.markdown(
 # BOTTONI NAVIGAZIONE
 # --------------------------------------------------
 
-nav1, nav2, nav_space = st.columns([1, 1, 6])
+nav1, nav2, nav_space = st.columns([1.25, 1.25, 5.5])
 
 with nav1:
     if st.button(
