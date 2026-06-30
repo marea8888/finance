@@ -588,24 +588,42 @@ def ricavi_chart(df):
     # La curva viene alzata visivamente sopra i totaloni.
     # --------------------------------------------------
 
-    fig.add_trace(
-        go.Scatter(
-            x=df["Mese"],
-            y=df["Totale FY Prec k€"] + 3600,
-            name="Totale stesso mese FY prec.",
-            mode="lines",
-            line=dict(
-                color=colore_fy_prec,
-                width=3.2,
-                dash="dash"
-            ),
-            hovertemplate=(
-                "<b>%{x}</b><br>"
-                "Totale stesso mese FY prec.: %{customdata:,.0f}<extra></extra>"
-            ),
-            customdata=df["Totale FY Prec k€"]
-        )
+    # --------------------------------------------------
+# Linea di tendenza FY precedente
+# Calcolata come trendline lineare, stile Excel
+# --------------------------------------------------
+
+x_num = np.arange(len(df))
+
+coeff = np.polyfit(
+    x_num,
+    df["Totale FY Prec k€"],
+    deg=1
+)
+
+trend_fy_prec = np.polyval(coeff, x_num)
+
+# La linea viene alzata solo graficamente per stare sopra i totaloni.
+# Il valore reale resta disponibile nell'hover tramite customdata.
+trend_offset = 3600
+
+fig.add_trace(
+    go.Scatter(
+        x=df["Mese"],
+        y=trend_fy_prec + trend_offset,
+        name="Trend totale stesso mese FY prec.",
+        mode="lines",
+        line=dict(
+            color=colore_fy_prec,
+            width=3.5
+        ),
+        hovertemplate=(
+            "<b>%{x}</b><br>"
+            "Trend FY prec.: %{customdata:,.0f}<extra></extra>"
+        ),
+        customdata=trend_fy_prec
     )
+)
 
     # --------------------------------------------------
     # Layout
