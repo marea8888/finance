@@ -444,26 +444,57 @@ def arpu_table():
 # --------------------------------------------------
 
 def ricavi_chart(df):
-    fig = make_subplots(specs=[[{"secondary_y": True}]])
+    fig = go.Figure()
 
     df = df.copy()
 
-    colore_retail = "#2563EB"
-    colore_wholesale = "#00BFA6"
-    colore_delta = "#E11D48"
+    # Palette moderna
+    colore_retail = "#2563EB"        # blu elettrico
+    colore_wholesale = "#00BFA6"     # teal/acqua
+    colore_fy_prec = "#6B7280"       # grigio per FY precedente
     colore_testo = "#111827"
+
+    # --------------------------------------------------
+    # Conversione in k€
+    # --------------------------------------------------
 
     df["Retail k€"] = df["Retail"] * 1000
     df["Wholesale k€"] = df["Wholesale"] * 1000
     df["Totale k€"] = df["Totale"] * 1000
 
-    df["Delta Totale k€"] = df["Totale k€"] - df["Totale k€"].iloc[0]
+    # --------------------------------------------------
+    # Totale stesso mese FY precedente
+    # --------------------------------------------------
+    # In produzione questa colonna dovrà arrivare dal dataset.
+    # Il codice sotto gestisce diversi possibili nomi colonna.
+    # Se non trova il dato reale, usa valori mock solo per non rompere il grafico.
+    # --------------------------------------------------
 
+    if "Totale FY Prec k€" in df.columns:
+        df["Totale FY Prec k€"] = df["Totale FY Prec k€"]
+
+    elif "Totale FY Prec" in df.columns:
+        df["Totale FY Prec k€"] = df["Totale FY Prec"] * 1000
+
+    elif "Totale FY precedente" in df.columns:
+        df["Totale FY Prec k€"] = df["Totale FY precedente"] * 1000
+
+    else:
+        # MOCK temporaneo: da sostituire con il dato reale del FY precedente
+        df["Totale FY Prec k€"] = df["Totale k€"] * np.array(
+            [1.012, 1.006, 1.000, 0.995, 1.004, 0.998, 1.010, 1.006, 1.002, 0.997, 1.005, 1.004]
+        )
+
+    # Percentuali di composizione FY corrente
     df["Perc Retail"] = df["Retail k€"] / df["Totale k€"] * 100
     df["Perc Wholesale"] = df["Wholesale k€"] / df["Totale k€"] * 100
 
     retail_text = [f"{v:.0f}%" for v in df["Perc Retail"]]
     wholesale_text = [f"{v:.0f}%" for v in df["Perc Wholesale"]]
+
+    # --------------------------------------------------
+    # Barre Retail FY corrente
+    # --------------------------------------------------
 
     fig.add_trace(
         go.Bar(
@@ -472,20 +503,30 @@ def ricavi_chart(df):
             name="Retail",
             marker=dict(
                 color=colore_retail,
-                line=dict(color="rgba(255,255,255,0.45)", width=1)
+                line=dict(
+                    color="rgba(255,255,255,0.45)",
+                    width=1
+                )
             ),
             text=retail_text,
             textposition="inside",
             insidetextanchor="start",
-            textfont=dict(size=18, color="white", family="Arial"),
+            textfont=dict(
+                size=18,
+                color="white",
+                family="Arial"
+            ),
             hovertemplate=(
                 "<b>%{x}</b><br>"
                 "Retail: %{y:,.0f}<br>"
                 "Quota Retail: %{text}<extra></extra>"
             )
-        ),
-        secondary_y=False
+        )
     )
+
+    # --------------------------------------------------
+    # Barre Wholesale FY corrente
+    # --------------------------------------------------
 
     fig.add_trace(
         go.Bar(
@@ -494,40 +535,60 @@ def ricavi_chart(df):
             name="Wholesale",
             marker=dict(
                 color=colore_wholesale,
-                line=dict(color="rgba(255,255,255,0.45)", width=1)
+                line=dict(
+                    color="rgba(255,255,255,0.45)",
+                    width=1
+                )
             ),
             text=wholesale_text,
             textposition="inside",
             insidetextanchor="middle",
-            textfont=dict(size=18, color="white", family="Arial"),
+            textfont=dict(
+                size=18,
+                color="white",
+                family="Arial"
+            ),
             hovertemplate=(
                 "<b>%{x}</b><br>"
                 "Wholesale: %{y:,.0f}<br>"
                 "Quota Wholesale: %{text}<extra></extra>"
             )
-        ),
-        secondary_y=False
+        )
     )
+
+    # --------------------------------------------------
+    # Curva FY precedente: valore assoluto stesso mese
+    # --------------------------------------------------
 
     fig.add_trace(
         go.Scatter(
             x=df["Mese"],
-            y=df["Delta Totale k€"],
-            name="Scostamento totale vs stesso mese FY prec.",
+            y=df["Totale FY Prec k€"],
+            name="Totale stesso mese FY prec.",
             mode="lines+markers",
-            line=dict(color=colore_delta, width=3.5),
+            line=dict(
+                color=colore_fy_prec,
+                width=3.2,
+                dash="dash"
+            ),
             marker=dict(
                 size=10,
-                color=colore_delta,
-                line=dict(width=2.5, color="white")
+                color=colore_fy_prec,
+                line=dict(
+                    width=2.5,
+                    color="white"
+                )
             ),
             hovertemplate=(
                 "<b>%{x}</b><br>"
-                "Scostamento totale: %{y:+,.0f}<extra></extra>"
+                "Totale stesso mese FY prec.: %{y:,.0f}<extra></extra>"
             )
-        ),
-        secondary_y=True
+        )
     )
+
+    # --------------------------------------------------
+    # Totalone FY corrente sopra ogni istogramma
+    # --------------------------------------------------
 
     for _, row in df.iterrows():
         fig.add_annotation(
@@ -535,75 +596,109 @@ def ricavi_chart(df):
             y=row["Totale k€"] + 1800,
             text=f"<b>{row['Totale k€']:,.0f}</b>".replace(",", "."),
             showarrow=False,
-            font=dict(size=22, color=colore_testo, family="Arial Black"),
-            yref="y1"
+            font=dict(
+                size=22,
+                color=colore_testo,
+                family="Arial Black"
+            )
         )
 
+    # --------------------------------------------------
+    # Etichette FY precedente
+    # Sopra o sotto in funzione del confronto con il FY corrente
+    # --------------------------------------------------
+
     for _, row in df.iterrows():
-        delta_value = row["Delta Totale k€"]
+        valore_fy_prec = row["Totale FY Prec k€"]
+        valore_fy_corr = row["Totale k€"]
+
+        if valore_fy_prec >= valore_fy_corr:
+            y_shift_label = 32
+        else:
+            y_shift_label = -32
 
         fig.add_annotation(
             x=row["Mese"],
-            y=delta_value,
-            yref="y2",
-            text=f"<b>{delta_value:+,.0f}</b>".replace(",", "."),
+            y=valore_fy_prec,
+            text=f"<b>{valore_fy_prec:,.0f}</b>".replace(",", "."),
             showarrow=False,
-            font=dict(size=14, color=colore_delta, family="Arial Black"),
+            font=dict(
+                size=14,
+                color=colore_fy_prec,
+                family="Arial Black"
+            ),
             bgcolor="rgba(255,255,255,0.96)",
-            bordercolor=colore_delta,
+            bordercolor=colore_fy_prec,
             borderwidth=1,
             borderpad=5,
-            yshift=24 if delta_value >= 0 else -24
+            yshift=y_shift_label
         )
+
+    # --------------------------------------------------
+    # Layout
+    # --------------------------------------------------
+
+    valore_massimo = max(
+        df["Totale k€"].max(),
+        df["Totale FY Prec k€"].max()
+    )
 
     fig.update_layout(
         barmode="stack",
         height=610,
         margin=dict(l=10, r=25, t=110, b=105),
+
         legend=dict(
             orientation="h",
             yanchor="bottom",
             y=1.03,
             xanchor="left",
             x=0,
-            font=dict(size=13)
+            font=dict(
+                size=13,
+                color=colore_testo,
+                family="Arial"
+            )
         ),
+
         hovermode="x unified",
+
         paper_bgcolor="white",
         plot_bgcolor="white",
-        uniformtext=dict(mode="show", minsize=14)
+
+        uniformtext=dict(
+            mode="show",
+            minsize=14
+        )
     )
+
+    # --------------------------------------------------
+    # Asse X più leggibile
+    # --------------------------------------------------
 
     fig.update_xaxes(
         tickangle=-25,
-        tickfont=dict(size=15, color="#111827", family="Arial"),
+        tickfont=dict(
+            size=15,
+            color=colore_testo,
+            family="Arial"
+        ),
         showline=False,
         showgrid=False,
         zeroline=False,
         automargin=True
     )
 
-    fig.update_yaxes(
-        visible=False,
-        showgrid=False,
-        zeroline=False,
-        range=[0, max(df["Totale k€"]) + 6800],
-        secondary_y=False
-    )
-
-    delta_min = df["Delta Totale k€"].min()
-    delta_max = df["Delta Totale k€"].max()
-    delta_abs = max(abs(delta_min), abs(delta_max), 100)
+    # --------------------------------------------------
+    # Asse Y nascosto
+    # Stesso asse per istogrammi e curva FY precedente
+    # --------------------------------------------------
 
     fig.update_yaxes(
         visible=False,
         showgrid=False,
         zeroline=False,
-        range=[
-            delta_min - delta_abs * 2,
-            delta_max + delta_abs * 2
-        ],
-        secondary_y=True
+        range=[0, valore_massimo + 7000]
     )
 
     return fig
