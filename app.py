@@ -367,24 +367,79 @@ def double_kpi_card(title_1, value_1, title_2, value_2):
 
 def money_table():
     data = [
-        ["RETAIL", "345.207", "1.168.215", "1.644.236", "", "", "", "", "16.297.676"],
-        ["WHOLESALE", "32.414", "31.063", "28.949", "1.106.147", "1.278.845", "5.654", "61", "2.698.346"],
-        ["Totale", "377.622", "1.199.278", "1.673.185", "1.106.147", "1.278.845", "5.654", "61", "18.996.022"],
+        ["RETAIL", "163.596.119", "20.737.160", "12.203.216", "4.663.997", "41.853", "201.242.345"],
+        ["WHOLESALE", "4.413.669", "4.160.792", "7.863.751", "12.412.962", "2.964", "28.854.139"],
+        ["Totale", "168.009.789", "24.897.952", "20.066.968", "17.076.959", "44.817", "230.096.485"],
     ]
 
     columns = [
         "BU",
-        "ail",
-        "DigitalPush",
-        "Business",
-        "SMALL TELCO",
-        "TOP TELCO",
-        "BIG OLO",
-        "",
+        "CONSUMER",
+        "SOHO",
+        "BUSINESS",
+        "TOP",
+        "STAGIONALE",
         "Totale"
     ]
 
-    html = '<table>'
+    html = """
+    <style>
+        .ricavi-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        .ricavi-table th {
+            background-color: #0099D6;
+            color: white;
+            padding: 0.65rem;
+            text-align: right;
+            font-weight: 800;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .ricavi-table th:first-child {
+            text-align: left;
+        }
+
+        .ricavi-table td {
+            padding: 0.60rem;
+            border: 1px solid #e5e5e5;
+            text-align: right;
+            color: #222222;
+            background-color: white;
+            font-weight: 500;
+        }
+
+        .ricavi-table td:first-child {
+            text-align: left;
+            background-color: #EFEFEF;
+            font-weight: 700;
+        }
+
+        .ricavi-table td.total-col {
+            background-color: #D9D9D9;
+            font-weight: 800;
+        }
+
+        .ricavi-table tr.total-row td {
+            background-color: #CFCFCF;
+            font-weight: 900;
+        }
+
+        .ricavi-table tr.total-row td:first-child {
+            background-color: #CFCFCF;
+        }
+
+        .ricavi-table tr.total-row td.total-col {
+            background-color: #CFCFCF;
+            font-weight: 900;
+        }
+    </style>
+    """
+
+    html += '<table class="ricavi-table">'
     html += '<thead><tr>'
 
     for col in columns:
@@ -394,11 +449,12 @@ def money_table():
     html += '<tbody>'
 
     for row in data:
-        cls = "total-row" if row[0] == "Totale" else ""
-        html += f'<tr class="{cls}">'
+        row_class = "total-row" if row[0] == "Totale" else ""
+        html += f'<tr class="{row_class}">'
 
-        for cell in row:
-            html += f'<td>{cell}</td>'
+        for i, cell in enumerate(row):
+            cell_class = "total-col" if i == len(row) - 1 else ""
+            html += f'<td class="{cell_class}">{cell}</td>'
 
         html += '</tr>'
 
