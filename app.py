@@ -448,10 +448,10 @@ def ricavi_chart(df):
 
     df = df.copy()
 
-    # Palette moderna
-    colore_retail = "#2563EB"        # blu elettrico
-    colore_wholesale = "#00BFA6"     # teal/acqua
-    colore_fy_prec = "#6B7280"       # grigio per FY precedente
+    # Colori stile grafico iniziale
+    colore_retail = "#005B96"        # blu scuro
+    colore_wholesale = "#F2C94C"     # giallo chiaro
+    colore_fy_prec = "#6B7280"       # grigio tratteggiato
     colore_testo = "#111827"
 
     # --------------------------------------------------
@@ -466,7 +466,6 @@ def ricavi_chart(df):
     # Totale stesso mese FY precedente
     # --------------------------------------------------
     # In produzione questa colonna dovrà arrivare dal dataset.
-    # Il codice sotto gestisce diversi possibili nomi colonna.
     # Se non trova il dato reale, usa valori mock solo per non rompere il grafico.
     # --------------------------------------------------
 
@@ -480,20 +479,24 @@ def ricavi_chart(df):
         df["Totale FY Prec k€"] = df["Totale FY precedente"] * 1000
 
     else:
-        # MOCK temporaneo: da sostituire con il dato reale del FY precedente
+        # MOCK temporaneo: da sostituire con dato reale FY precedente
         df["Totale FY Prec k€"] = df["Totale k€"] * np.array(
             [1.012, 1.006, 1.000, 0.995, 1.004, 0.998, 1.010, 1.006, 1.002, 0.997, 1.005, 1.004]
         )
 
     # --------------------------------------------------
-    # Percentuali di composizione FY corrente
+    # Testi assoluti dentro le barre
     # --------------------------------------------------
 
-    df["Perc Retail"] = df["Retail k€"] / df["Totale k€"] * 100
-    df["Perc Wholesale"] = df["Wholesale k€"] / df["Totale k€"] * 100
+    retail_text = [
+        f"{v:,.0f}".replace(",", ".")
+        for v in df["Retail k€"]
+    ]
 
-    retail_text = [f"{v:.0f}%" for v in df["Perc Retail"]]
-    wholesale_text = [f"{v:.0f}%" for v in df["Perc Wholesale"]]
+    wholesale_text = [
+        f"{v:,.0f}".replace(",", ".")
+        for v in df["Wholesale k€"]
+    ]
 
     # --------------------------------------------------
     # Barre Retail FY corrente
@@ -513,16 +516,15 @@ def ricavi_chart(df):
             ),
             text=retail_text,
             textposition="inside",
-            insidetextanchor="start",
+            insidetextanchor="middle",
             textfont=dict(
-                size=18,
+                size=15,
                 color="white",
                 family="Arial"
             ),
             hovertemplate=(
                 "<b>%{x}</b><br>"
-                "Retail: %{y:,.0f}<br>"
-                "Quota Retail: %{text}<extra></extra>"
+                "Retail: %{text}<extra></extra>"
             )
         )
     )
@@ -547,14 +549,13 @@ def ricavi_chart(df):
             textposition="inside",
             insidetextanchor="middle",
             textfont=dict(
-                size=18,
-                color="white",
+                size=13,
+                color="#111827",
                 family="Arial"
             ),
             hovertemplate=(
                 "<b>%{x}</b><br>"
-                "Wholesale: %{y:,.0f}<br>"
-                "Quota Wholesale: %{text}<extra></extra>"
+                "Wholesale: %{text}<extra></extra>"
             )
         )
     )
@@ -578,19 +579,19 @@ def ricavi_chart(df):
 
     # --------------------------------------------------
     # Curva FY precedente
-    # La aggiungo DOPO i totaloni, così graficamente risulta sopra.
-    # Nessun punto, nessun box, solo linea grigia tratteggiata.
+    # Solo linea grigia tratteggiata, senza punti e senza box.
+    # La curva viene alzata visivamente sopra i totaloni.
     # --------------------------------------------------
 
     fig.add_trace(
         go.Scatter(
             x=df["Mese"],
-            y=df["Totale FY Prec k€"] + 3200,
+            y=df["Totale FY Prec k€"] + 3600,
             name="Totale stesso mese FY prec.",
             mode="lines",
             line=dict(
                 color=colore_fy_prec,
-                width=3.4,
+                width=3.2,
                 dash="dash"
             ),
             hovertemplate=(
@@ -607,13 +608,13 @@ def ricavi_chart(df):
 
     valore_massimo = max(
         df["Totale k€"].max(),
-        (df["Totale FY Prec k€"] + 3200).max()
+        (df["Totale FY Prec k€"] + 3600).max()
     )
 
     fig.update_layout(
         barmode="stack",
         height=610,
-        margin=dict(l=10, r=25, t=110, b=105),
+        margin=dict(l=10, r=25, t=115, b=105),
 
         legend=dict(
             orientation="h",
@@ -635,12 +636,12 @@ def ricavi_chart(df):
 
         uniformtext=dict(
             mode="show",
-            minsize=14
+            minsize=11
         )
     )
 
     # --------------------------------------------------
-    # Asse X più leggibile
+    # Asse X
     # --------------------------------------------------
 
     fig.update_xaxes(
@@ -664,10 +665,11 @@ def ricavi_chart(df):
         visible=False,
         showgrid=False,
         zeroline=False,
-        range=[0, valore_massimo + 4500]
+        range=[0, valore_massimo + 4800]
     )
 
     return fig
+    
 
 def arpu_chart(df):
     fig = go.Figure()
