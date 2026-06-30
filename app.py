@@ -603,7 +603,7 @@ def ricavi_chart(df):
         go.Scatter(
             x=df["Mese"],
             y=df["Totale FY Prec k€"],
-            name="Totale stesso mese FY prec.",
+            name="PY Ricavi Ricorrenti",
             mode="lines+markers",
             line=dict(
                 color=colore_fy_prec,
