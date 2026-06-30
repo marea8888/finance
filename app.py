@@ -485,7 +485,10 @@ def ricavi_chart(df):
             [1.012, 1.006, 1.000, 0.995, 1.004, 0.998, 1.010, 1.006, 1.002, 0.997, 1.005, 1.004]
         )
 
+    # --------------------------------------------------
     # Percentuali di composizione FY corrente
+    # --------------------------------------------------
+
     df["Perc Retail"] = df["Retail k€"] / df["Totale k€"] * 100
     df["Perc Wholesale"] = df["Wholesale k€"] / df["Totale k€"] * 100
 
@@ -557,36 +560,6 @@ def ricavi_chart(df):
     )
 
     # --------------------------------------------------
-    # Curva FY precedente: valore assoluto stesso mese
-    # --------------------------------------------------
-
-    fig.add_trace(
-        go.Scatter(
-            x=df["Mese"],
-            y=df["Totale FY Prec k€"],
-            name="Totale stesso mese FY prec.",
-            mode="lines+markers",
-            line=dict(
-                color=colore_fy_prec,
-                width=3.2,
-                dash="dash"
-            ),
-            marker=dict(
-                size=10,
-                color=colore_fy_prec,
-                line=dict(
-                    width=2.5,
-                    color="white"
-                )
-            ),
-            hovertemplate=(
-                "<b>%{x}</b><br>"
-                "Totale stesso mese FY prec.: %{y:,.0f}<extra></extra>"
-            )
-        )
-    )
-
-    # --------------------------------------------------
     # Totalone FY corrente sopra ogni istogramma
     # --------------------------------------------------
 
@@ -604,35 +577,29 @@ def ricavi_chart(df):
         )
 
     # --------------------------------------------------
-    # Etichette FY precedente
-    # Sopra o sotto in funzione del confronto con il FY corrente
+    # Curva FY precedente
+    # La aggiungo DOPO i totaloni, così graficamente risulta sopra.
+    # Nessun punto, nessun box, solo linea grigia tratteggiata.
     # --------------------------------------------------
 
-    for _, row in df.iterrows():
-        valore_fy_prec = row["Totale FY Prec k€"]
-        valore_fy_corr = row["Totale k€"]
-
-        if valore_fy_prec >= valore_fy_corr:
-            y_shift_label = 32
-        else:
-            y_shift_label = -32
-
-        fig.add_annotation(
-            x=row["Mese"],
-            y=valore_fy_prec,
-            text=f"<b>{valore_fy_prec:,.0f}</b>".replace(",", "."),
-            showarrow=False,
-            font=dict(
-                size=14,
+    fig.add_trace(
+        go.Scatter(
+            x=df["Mese"],
+            y=df["Totale FY Prec k€"] + 3200,
+            name="Totale stesso mese FY prec.",
+            mode="lines",
+            line=dict(
                 color=colore_fy_prec,
-                family="Arial Black"
+                width=3.4,
+                dash="dash"
             ),
-            bgcolor="rgba(255,255,255,0.96)",
-            bordercolor=colore_fy_prec,
-            borderwidth=1,
-            borderpad=5,
-            yshift=y_shift_label
+            hovertemplate=(
+                "<b>%{x}</b><br>"
+                "Totale stesso mese FY prec.: %{customdata:,.0f}<extra></extra>"
+            ),
+            customdata=df["Totale FY Prec k€"]
         )
+    )
 
     # --------------------------------------------------
     # Layout
@@ -640,7 +607,7 @@ def ricavi_chart(df):
 
     valore_massimo = max(
         df["Totale k€"].max(),
-        df["Totale FY Prec k€"].max()
+        (df["Totale FY Prec k€"] + 3200).max()
     )
 
     fig.update_layout(
@@ -691,18 +658,16 @@ def ricavi_chart(df):
 
     # --------------------------------------------------
     # Asse Y nascosto
-    # Stesso asse per istogrammi e curva FY precedente
     # --------------------------------------------------
 
     fig.update_yaxes(
         visible=False,
         showgrid=False,
         zeroline=False,
-        range=[0, valore_massimo + 7000]
+        range=[0, valore_massimo + 4500]
     )
 
     return fig
-
 
 def arpu_chart(df):
     fig = go.Figure()
