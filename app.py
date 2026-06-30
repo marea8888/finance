@@ -449,8 +449,7 @@ def arpu_table():
 # La curva viene alzata visivamente sopra i totaloni.
 # --------------------------------------------------
 def ricavi_chart(df):
-    fig = go.Figure()
-
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
     df = df.copy()
 
     # Colori stile grafico iniziale
@@ -483,14 +482,14 @@ def ricavi_chart(df):
         df["Totale FY Prec k€"] = df["Totale FY precedente"] * 1000
 
     else:
-        # MOCK temporaneo: da sostituire con dato reale FY precedente
+        # MOCK temporaneo
         df["Totale FY Prec k€"] = df["Totale k€"] * np.array(
             [1.012, 1.006, 1.000, 0.995, 1.004, 0.998, 1.010, 1.006, 1.002, 0.997, 1.005, 1.004]
         )
 
     # --------------------------------------------------
-    # Linea di tendenza stile Excel
-    # Calcolata sui valori del totale FY precedente
+    # Trendline stile Excel
+    # Regressione lineare sul totale FY precedente
     # --------------------------------------------------
 
     x_num = np.arange(len(df))
@@ -501,18 +500,11 @@ def ricavi_chart(df):
     # Testi assoluti dentro le barre
     # --------------------------------------------------
 
-    retail_text = [
-        f"{v:,.0f}".replace(",", ".")
-        for v in df["Retail k€"]
-    ]
-
-    wholesale_text = [
-        f"{v:,.0f}".replace(",", ".")
-        for v in df["Wholesale k€"]
-    ]
+    retail_text = [f"{v:,.0f}".replace(",", ".") for v in df["Retail k€"]]
+    wholesale_text = [f"{v:,.0f}".replace(",", ".") for v in df["Wholesale k€"]]
 
     # --------------------------------------------------
-    # Barre Retail FY corrente
+    # Barre Retail
     # --------------------------------------------------
 
     fig.add_trace(
@@ -522,10 +514,7 @@ def ricavi_chart(df):
             name="Retail",
             marker=dict(
                 color=colore_retail,
-                line=dict(
-                    color="rgba(255,255,255,0.45)",
-                    width=1
-                )
+                line=dict(color="rgba(255,255,255,0.45)", width=1)
             ),
             text=retail_text,
             textposition="inside",
@@ -535,15 +524,13 @@ def ricavi_chart(df):
                 color="white",
                 family="Arial"
             ),
-            hovertemplate=(
-                "<b>%{x}</b><br>"
-                "Retail: %{y:,.0f}<extra></extra>"
-            )
-        )
+            hovertemplate="<b>%{x}</b><br>Retail: %{y:,.0f}<extra></extra>"
+        ),
+        secondary_y=False
     )
 
     # --------------------------------------------------
-    # Barre Wholesale FY corrente
+    # Barre Wholesale
     # --------------------------------------------------
 
     fig.add_trace(
@@ -553,10 +540,7 @@ def ricavi_chart(df):
             name="Wholesale",
             marker=dict(
                 color=colore_wholesale,
-                line=dict(
-                    color="rgba(255,255,255,0.45)",
-                    width=1
-                )
+                line=dict(color="rgba(255,255,255,0.45)", width=1)
             ),
             text=wholesale_text,
             textposition="inside",
@@ -566,15 +550,13 @@ def ricavi_chart(df):
                 color="#111827",
                 family="Arial"
             ),
-            hovertemplate=(
-                "<b>%{x}</b><br>"
-                "Wholesale: %{y:,.0f}<extra></extra>"
-            )
-        )
+            hovertemplate="<b>%{x}</b><br>Wholesale: %{y:,.0f}<extra></extra>"
+        ),
+        secondary_y=False
     )
 
     # --------------------------------------------------
-    # Totalone FY corrente sopra ogni istogramma
+    # Totalone sopra ogni istogramma
     # --------------------------------------------------
 
     for _, row in df.iterrows():
@@ -587,12 +569,13 @@ def ricavi_chart(df):
                 size=22,
                 color=colore_testo,
                 family="Arial Black"
-            )
+            ),
+            yref="y"
         )
 
     # --------------------------------------------------
-    # Trendline FY precedente
-    # Disegnata sulla scala reale, quindi in mezzo alle barre
+    # Trendline sovrapposta alle barre
+    # Asse secondario nascosto con scala dedicata
     # --------------------------------------------------
 
     fig.add_trace(
@@ -605,21 +588,14 @@ def ricavi_chart(df):
                 color=colore_trend,
                 width=4
             ),
-            hovertemplate=(
-                "<b>%{x}</b><br>"
-                "Trend FY prec.: %{y:,.0f}<extra></extra>"
-            )
-        )
+            hovertemplate="<b>%{x}</b><br>Trend FY prec.: %{y:,.0f}<extra></extra>"
+        ),
+        secondary_y=True
     )
 
     # --------------------------------------------------
     # Layout
     # --------------------------------------------------
-
-    valore_massimo = max(
-        df["Totale k€"].max(),
-        trend_fy_prec.max()
-    )
 
     fig.update_layout(
         barmode="stack",
@@ -666,14 +642,35 @@ def ricavi_chart(df):
     )
 
     # --------------------------------------------------
-    # Asse Y nascosto
+    # Asse Y principale (barre)
     # --------------------------------------------------
 
     fig.update_yaxes(
         visible=False,
         showgrid=False,
         zeroline=False,
-        range=[0, valore_massimo + 4800]
+        range=[0, df["Totale k€"].max() + 5000],
+        secondary_y=False
+    )
+
+    # --------------------------------------------------
+    # Asse Y secondario (trendline)
+    # Scala compressa e centrata, così la linea sta
+    # "in mezzo" agli istogrammi e il trend si apprezza.
+    # --------------------------------------------------
+
+    trend_center = trend_fy_prec.mean()
+    trend_span = max(trend_fy_prec.max() - trend_fy_prec.min(), 150)
+
+    fig.update_yaxes(
+        visible=False,
+        showgrid=False,
+        zeroline=False,
+        range=[
+            trend_center - trend_span * 2.2,
+            trend_center + trend_span * 2.2
+        ],
+        secondary_y=True
     )
 
     return fig
