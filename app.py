@@ -586,7 +586,8 @@ def ricavi_chart(df):
             mode="lines",
             line=dict(
                 color=colore_trend,
-                width=4
+                width=4,
+                dash="dot"
             ),
             hovertemplate="<b>%{x}</b><br>Trend FY prec.: %{y:,.0f}<extra></extra>"
         ),
