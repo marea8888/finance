@@ -817,30 +817,56 @@ def arpu_chart(df):
 
     df = df.copy()
 
-    colore_retail = "#2563EB"
-    colore_wholesale = "#00BFA6"
-    colore_totale = "#E11D48"
+    # Colori stile immagine allegata
+    colore_retail = "#005B96"        # blu scuro
+    colore_wholesale = "#F2C94C"     # giallo chiaro
+    colore_media = "#D65F2D"         # rosso/arancione linea
     colore_testo = "#111827"
+
+    # --------------------------------------------------
+    # Formattazione italiana con virgola decimale
+    # --------------------------------------------------
 
     def fmt_decimal(value, decimals=1):
         return f"{value:.{decimals}f}".replace(".", ",")
 
-    retail_text = [fmt_decimal(v, 1) for v in df["ARPU Retail"]]
-    wholesale_text = [fmt_decimal(v, 1) for v in df["ARPU Wholesale"]]
+    # Label asse X su due righe: 2025 / Apr
+    df["Mese Label"] = df["Mese"].str.replace(" ", "<br>")
+
+    retail_text = [
+        fmt_decimal(v, 1)
+        for v in df["ARPU Retail"]
+    ]
+
+    wholesale_text = [
+        fmt_decimal(v, 1)
+        for v in df["ARPU Wholesale"]
+    ]
+
+    # --------------------------------------------------
+    # Barre Retail
+    # --------------------------------------------------
 
     fig.add_trace(
         go.Bar(
-            x=df["Mese"],
+            x=df["Mese Label"],
             y=df["ARPU Retail"],
             name="Retail",
             marker=dict(
                 color=colore_retail,
-                line=dict(color="rgba(255,255,255,0.45)", width=1)
+                line=dict(
+                    color="rgba(255,255,255,0.55)",
+                    width=1
+                )
             ),
             text=retail_text,
             textposition="inside",
             insidetextanchor="middle",
-            textfont=dict(size=17, color="white", family="Arial"),
+            textfont=dict(
+                size=15,
+                color="white",
+                family="Arial"
+            ),
             hovertemplate=(
                 "<b>%{x}</b><br>"
                 "ARPU Retail: %{text}<extra></extra>"
@@ -848,19 +874,30 @@ def arpu_chart(df):
         )
     )
 
+    # --------------------------------------------------
+    # Barre Wholesale
+    # --------------------------------------------------
+
     fig.add_trace(
         go.Bar(
-            x=df["Mese"],
+            x=df["Mese Label"],
             y=df["ARPU Wholesale"],
             name="Wholesale",
             marker=dict(
                 color=colore_wholesale,
-                line=dict(color="rgba(255,255,255,0.45)", width=1)
+                line=dict(
+                    color="rgba(255,255,255,0.55)",
+                    width=1
+                )
             ),
             text=wholesale_text,
             textposition="inside",
             insidetextanchor="middle",
-            textfont=dict(size=17, color="white", family="Arial"),
+            textfont=dict(
+                size=15,
+                color=colore_testo,
+                family="Arial"
+            ),
             hovertemplate=(
                 "<b>%{x}</b><br>"
                 "ARPU Wholesale: %{text}<extra></extra>"
@@ -868,65 +905,38 @@ def arpu_chart(df):
         )
     )
 
+    # --------------------------------------------------
+    # Linea ARPU medio / totale
+    # --------------------------------------------------
+
     fig.add_trace(
         go.Scatter(
-            x=df["Mese"],
+            x=df["Mese Label"],
             y=df["ARPU Totale"],
-            name="Media",
+            name="ARPU medio",
             mode="lines+markers",
-            line=dict(color=colore_totale, width=3.5),
+            line=dict(
+                color=colore_media,
+                width=3.5
+            ),
             marker=dict(
-                size=10,
-                color=colore_totale,
-                line=dict(width=2.5, color="white")
+                size=8,
+                color=colore_media,
+                line=dict(
+                    width=1.5,
+                    color=colore_media
+                )
             ),
             hovertemplate=(
                 "<b>%{x}</b><br>"
-                "ARPU Medio: %{y:.1f}<extra></extra>"
+                "ARPU medio: %{y:.1f}<extra></extra>"
             )
         )
     )
 
-    for _, row in df.iterrows():
-        fig.add_annotation(
-            x=row["Mese"],
-            y=row["ARPU Totale"],
-            text=f"<b>{fmt_decimal(row['ARPU Totale'], 1)}</b>",
-            showarrow=False,
-            font=dict(size=14, color=colore_totale, family="Arial Black"),
-            bgcolor="rgba(255,255,255,0.96)",
-            bordercolor=colore_totale,
-            borderwidth=1,
-            borderpad=5,
-            yshift=24
-        )
-
-    fig.update_layout(
-        barmode="group",
-        height=600,
-        margin=dict(l=10, r=25, t=100, b=105),
-        legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=1.03,
-            xanchor="left",
-            x=0,
-            font=dict(size=13, color=colore_testo, family="Arial")
-        ),
-        hovermode="x unified",
-        paper_bgcolor="white",
-        plot_bgcolor="white",
-        uniformtext=dict(mode="show", minsize=13)
-    )
-
-    fig.update_xaxes(
-        tickangle=-25,
-        tickfont=dict(size=15, color=colore_testo, family="Arial"),
-        showline=False,
-        showgrid=False,
-        zeroline=False,
-        automargin=True
-    )
+    # --------------------------------------------------
+    # Layout
+    # --------------------------------------------------
 
     valore_max = max(
         df["ARPU Retail"].max(),
@@ -934,11 +944,64 @@ def arpu_chart(df):
         df["ARPU Totale"].max()
     )
 
+    fig.update_layout(
+        barmode="group",
+        height=600,
+        margin=dict(l=10, r=25, t=95, b=105),
+
+        bargap=0.28,
+        bargroupgap=0.08,
+
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.03,
+            xanchor="left",
+            x=0,
+            font=dict(
+                size=13,
+                color=colore_testo,
+                family="Arial"
+            )
+        ),
+
+        hovermode="x unified",
+
+        paper_bgcolor="white",
+        plot_bgcolor="white",
+
+        uniformtext=dict(
+            mode="show",
+            minsize=11
+        )
+    )
+
+    # --------------------------------------------------
+    # Asse X
+    # --------------------------------------------------
+
+    fig.update_xaxes(
+        tickangle=0,
+        tickfont=dict(
+            size=13,
+            color="#6B7280",
+            family="Arial"
+        ),
+        showline=False,
+        showgrid=False,
+        zeroline=False,
+        automargin=True
+    )
+
+    # --------------------------------------------------
+    # Asse Y nascosto
+    # --------------------------------------------------
+
     fig.update_yaxes(
         visible=False,
         showgrid=False,
         zeroline=False,
-        range=[0, valore_max + 14]
+        range=[0, valore_max + 10]
     )
 
     return fig
